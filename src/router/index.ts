@@ -1,5 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import AnalysisView from '../views/AnalysisView.vue'
+import ServiceOrder from '@/components/ServiceOrder.vue'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -17,7 +18,7 @@ const router = createRouter({
     {
       path: '/ordens',
       name: 'orders',
-      component: AnalysisView,
+      component: ServiceOrder,
     },
   ],
 })

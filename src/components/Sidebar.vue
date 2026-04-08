@@ -39,7 +39,7 @@
       <button
         class="flex items-center gap-3 px-4 py-3 text-sm hover:text-red-400 transition-colors"
       >
-        <span>⬅️</span> Sair
+        Sair
       </button>
     </div>
   </aside>
