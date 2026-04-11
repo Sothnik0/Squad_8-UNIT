@@ -15,7 +15,7 @@
         class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-slate-800 hover:text-white"
         active-class="bg-blue-600 !text-white"
       >
-        <span>📊</span>Análise de Documento
+        <span>📊</span> Dashboard
       </RouterLink>
 
       <RouterLink
@@ -23,7 +23,7 @@
         class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-slate-800 hover:text-white"
         active-class="bg-blue-600 !text-white"
       >
-        <span>🛡️</span> Dashboard
+        <span>🛡️</span> Análise de Documento
       </RouterLink>
 
       <RouterLink
@@ -33,6 +33,15 @@
       >
         <span>📋</span> Ordens de Serviço
       </RouterLink>
+
+      <RouterLink 
+        to="/links" 
+        class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-slate-800 hover:text-white"
+        active-class="bg-blue-600 !text-white"
+      >
+        <span class="text-xl">🔗</span> Links Úteis
+      </RouterLink>
+
     </nav>
 
     <div class="pt-4 border-t border-slate-800">

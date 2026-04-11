@@ -1,0 +1,15 @@
+.fade-enter-active, .fade-leave-active { 
+    transition: opacity 0.5s ease; 
+}
+.fade-enter-from, .fade-leave-to { 
+    opacity: 0; 
+}
+
+@keyframes pulse-subtle {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 3s infinite ease-in-out;
+}
