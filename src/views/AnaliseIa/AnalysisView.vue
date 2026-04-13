@@ -13,7 +13,7 @@
 
       <div class="bg-white rounded-xl shadow-sm border border-gray-100 p-8 mb-6">
         <h3 class="text-lg font-semibold mb-6">Informações da Solicitação</h3>
-        
+
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div class="space-y-2">
             <label class="text-sm font-medium">Nome do Solicitante *</label>
@@ -44,7 +44,6 @@
               class="w-full p-3 bg-gray-50 border rounded-lg outline-none transition"
               :class="erros.tipo ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-200 focus:ring-2 focus:ring-blue-500'"
             >
-              <option value="">Selecione o tipo</option>
               <option value="certificado">Certificado Técnico</option>
               <option value="identidade">Documento de Identidade</option>
             </select>
@@ -109,7 +108,7 @@
 
       <transition name="fade">
         <div v-if="isAnalyzed && !isAnalyzing" class="mt-10 space-y-6 pb-20">
-          
+
           <div class="bg-red-50 border border-red-200 p-6 rounded-xl flex items-start gap-4 shadow-sm">
             <div class="bg-red-600 p-3 rounded-lg text-white">⚠️</div>
             <div class="flex-1">
@@ -178,10 +177,10 @@
 </template>
 
 <script setup lang="ts">
-  import { 
+  import {
     nomeSolicitante, departamento, tipoDocumento, descricao,
     fileInput, file, fileUrl, isAnalyzing, isAnalyzed, showDocModal, erros,
-    triggerFile, onFileChange, removeFile, startAnalysis, openManualAnalysis 
+    triggerFile, onFileChange, removeFile, startAnalysis, openManualAnalysis
   } from './analysis'
 </script>
 

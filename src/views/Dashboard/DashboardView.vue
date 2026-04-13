@@ -13,7 +13,7 @@
         </div>
         <div class="bg-blue-50 p-3 rounded-xl text-blue-600 text-xl">📄</div>
       </div>
-      
+
       <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex justify-between items-center">
         <div>
           <p class="text-slate-500 text-xs font-semibold uppercase mb-1">Aprovados</p>
@@ -40,12 +40,12 @@
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-      
+
       <div class="lg:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
         <div class="flex justify-between items-center mb-6">
           <h3 class="font-bold text-slate-800 text-lg">Últimas Análises</h3>
         </div>
-        
+
         <div class="overflow-x-auto">
           <table class="w-full text-left">
             <thead>
@@ -93,15 +93,15 @@
 
       <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 flex flex-col items-center">
         <h3 class="font-bold text-slate-800 text-lg self-start mb-6">Distribuição por Status</h3>
-        
+
         <div class="relative w-40 h-40">
           <div class="w-full h-full rounded-full border-[12px] border-emerald-500 border-t-amber-400 border-r-rose-400"></div>
         </div>
 
         <div class="mt-8 flex flex-wrap justify-center gap-3 text-[10px] font-bold uppercase tracking-widest text-slate-400">
-          <div class="flex items-center gap-1.5"><span class="w-2 h-2 bg-emerald-500 rounded-full"></span> Rejeitado</div>
-          <div class="flex items-center gap-1.5"><span class="w-2 h-2 bg-rose-400 rounded-full"></span> Pendente</div>
-          <div class="flex items-center gap-1.5"><span class="w-2 h-2 bg-amber-400 rounded-full"></span> Aprovado</div>
+          <div class="flex items-center gap-1.5"><span class="w-2 h-2 bg-emerald-500 rounded-full"></span>Aprovado</div>
+          <div class="flex items-center gap-1.5"><span class="w-2 h-2 bg-rose-400 rounded-full"></span>Rejeitado</div>
+          <div class="flex items-center gap-1.5"><span class="w-2 h-2 bg-amber-400 rounded-full"></span>Pendente</div>
         </div>
       </div>
 
