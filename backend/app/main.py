@@ -3,6 +3,7 @@ import os
 import uuid
 import base64
 import requests
+from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -10,7 +11,11 @@ from google import genai
 from google.genai import types
 
 # ================= CONFIG =================
-client = genai.Client(api_key="AIzaSyACDRaMAezne5s9iYIsPskSpJvyED_JijM")
+load_dotenv()
+
+api_key = os.getenv("GEMINI_API_KEY")
+
+client = genai.Client(api_key=api_key)
 
 app = FastAPI()
 
@@ -56,7 +61,7 @@ def gerar_prompt(req: AnaliseRequest):
     
     Retorne APENAS um JSON no exato formato abaixo:
     {{
-      "probabilidade_fraude": 0-100,
+      "probabilidade_fraude": 0,
       "resumo": "Texto curto explicando a decisão principal.",
       "alertas": ["Lista de strings com alertas de fraude visual encontrados. Deixe vazio se não houver."],
       "dados_chave": [
@@ -77,7 +82,7 @@ async def analisar(req: AnaliseRequest):
         image_bytes = base64.b64decode(req.arquivo.conteudo_base64)
         
         response = client.models.generate_content(
-            model='gemini-1.5-flash',
+            model='gemini-2.0-flash',
             contents=[
                 types.Part.from_bytes(data=image_bytes, mime_type=req.arquivo.tipo_mime),
                 prompt
