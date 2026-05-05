@@ -16,6 +16,7 @@ export interface AnalysisResult {
   dados_chave: AnalysisFinding[]
   verificacoes_oficiais: AnalysisFinding[]
   alertas: string[]
+  fatores_score: string[]
   proximos_passos: string[]
 }
 
@@ -51,13 +52,13 @@ export const onFileChange = (e: Event) => {
   isAnalyzed.value = false
 
   if (!ALLOWED_TYPES.includes(selectedFile.type)) {
-    erros.value.arquivo = 'Formato não suportado. Envie PDF, JPG, JPEG ou PNG.'
+    erros.value.arquivo = 'Formato nao suportado. Envie PDF, JPG, JPEG ou PNG.'
     target.value = ''
     return
   }
 
   if (selectedFile.size > MAX_FILE_SIZE) {
-    erros.value.arquivo = 'O arquivo deve ter no máximo 10MB.'
+    erros.value.arquivo = 'O arquivo deve ter no maximo 10MB.'
     target.value = ''
     return
   }
@@ -86,7 +87,7 @@ export const startAnalysis = async () => {
   let valido = true
 
   if (!nomeSolicitante.value.trim()) {
-    erros.value.nome = 'Campo obrigatório'
+    erros.value.nome = 'Campo obrigatorio'
     valido = false
   }
   if (!tipoDocumento.value) {
@@ -94,7 +95,7 @@ export const startAnalysis = async () => {
     valido = false
   }
   if (!file.value) {
-    erros.value.arquivo = 'Você deve enviar um documento antes de analisar.'
+    erros.value.arquivo = 'Voce deve enviar um documento antes de analisar.'
     valido = false
   }
 
@@ -123,13 +124,13 @@ export const startAnalysis = async () => {
 
     const data = await response.json()
     if (!response.ok) {
-      throw new Error(data.detail ?? 'Não foi possível analisar o documento.')
+      throw new Error(data.detail ?? 'Nao foi possivel analisar o documento.')
     }
 
     analysisResult.value = data
     isAnalyzed.value = true
   } catch (error) {
-    apiError.value = error instanceof Error ? error.message : 'Erro inesperado na análise.'
+    apiError.value = error instanceof Error ? error.message : 'Erro inesperado na analise.'
   } finally {
     isAnalyzing.value = false
   }
@@ -146,6 +147,6 @@ const fileToBase64 = (selectedFile: File) =>
       const result = String(reader.result)
       resolve(result.split(',')[1] ?? '')
     }
-    reader.onerror = () => reject(new Error('Não foi possível ler o arquivo.'))
+    reader.onerror = () => reject(new Error('Nao foi possivel ler o arquivo.'))
     reader.readAsDataURL(selectedFile)
   })
