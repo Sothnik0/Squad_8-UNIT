@@ -55,22 +55,42 @@ def validar_cnpj_real(cnpj: str):
         return {"valido": False, "nome": None, "status": "ERRO API"}
 
 def gerar_prompt(req: AnaliseRequest):
-    return f"""
-    Analise este documento ({req.tipo_documento}) pertencente a {req.solicitante}.
-    Busque indícios de fraude, montagem, ou inconsistência. Se for histórico/certificado, extraia o CNPJ da instituição.
+    especificacoes = {
+        "atestado": "Extraia: Nome do médico, CRM, dias de afastamento e CID (se houver).",
+        "historico": "Extraia: Média Global/CRA, Disciplinas Pendentes e Data de Emissão.",
+        "certificado": "Extraia: Carga Horária total, Data de Conclusão e Nome do Curso.",
+        "rg": "Extraia: Número do RG, Data de Expedição e Naturalidade."
+    }
+
+    tipo_lower = req.tipo_documento.lower()
+    diretriz_especifica = "Extraia os dados identificadores principais."
     
-    Retorne APENAS um JSON no exato formato abaixo:
+    for chave, valor in especificacoes.items():
+        if chave in tipo_lower:
+            diretriz_especifica = valor
+            break
+
+    return f"""
+    Analise a autenticidade deste documento ({req.tipo_documento}) de {req.solicitante}.
+    FOCO PRINCIPAL: Identificar indícios de montagem, edições de texto, inconsistência de fontes ou fraudes visuais.
+    
+    TAREFA ADICIONAL: 
+    1. {diretriz_especifica}
+    2. Identifique SEMPRE o CNPJ da instituição emissora (se houver) para validação.
+
+    Retorne APENAS um JSON no formato:
     {{
       "probabilidade_fraude": 0,
-      "resumo": "Texto curto explicando a decisão principal.",
-      "alertas": ["Lista de strings com alertas de fraude visual encontrados. Deixe vazio se não houver."],
+      "resumo": "Explicação curta da análise.",
+      "alertas": ["Lista de alertas visuais de fraude encontrados."],
       "dados_chave": [
-        {{ "titulo": "Nome no Documento", "status": "encontrado", "detalhe": "Nome extraído" }},
-        {{ "titulo": "CNPJ", "status": "encontrado", "detalhe": "Apenas os números" }}
+        {{ "titulo": "Nome no Documento", "status": "encontrado", "detalhe": "Valor" }},
+        {{ "titulo": "CNPJ", "status": "encontrado", "detalhe": "Somente números" }},
+        {{ "titulo": "Dado Extra", "status": "encontrado", "detalhe": "Valor do dado extraído" }}
       ],
-      "proximos_passos": ["Lista de strings com sugestões do que o analista humano deve checar."]
+      "proximos_passos": ["O que o analista deve conferir."]
     }}
-    Lembre-se: Use os status permitidos: 'encontrado', 'nao_encontrado', 'pendente', 'alerta'.
+    Status permitidos: 'encontrado', 'nao_encontrado', 'pendente', 'alerta'.
     """
 
 # ================= ENDPOINT =================
@@ -78,61 +98,53 @@ def gerar_prompt(req: AnaliseRequest):
 async def analisar(req: AnaliseRequest):
     try:
         prompt = gerar_prompt(req)
-        
         image_bytes = base64.b64decode(req.arquivo.conteudo_base64)
         
         response = client.models.generate_content(
-            model='gemini-2.0-flash',
+            model='gemini-2.0-flash', #
             contents=[
                 types.Part.from_bytes(data=image_bytes, mime_type=req.arquivo.tipo_mime),
                 prompt
             ]
         )
         
-        texto = response.text.replace("```json", "").replace("```", "").strip()
+        texto = response.text.strip()
+        if "```json" in texto:
+            texto = texto.split("```json")[1].split("```")[0].strip()
+        
         res_ia = json.loads(texto)
         
         probabilidade = res_ia.get("probabilidade_fraude", 0)
         verificacoes = []
-        cnpj_extraido = None
+        cnpj_extraido = next((d.get("detalhe") for d in res_ia.get("dados_chave", []) if d.get("titulo") == "CNPJ"), None)
 
-        for dado in res_ia.get("dados_chave", []):
-            if dado.get("titulo") == "CNPJ" and dado.get("detalhe"):
-                cnpj_extraido = dado.get("detalhe")
-                break
-
-        if cnpj_extraido and len(str(cnpj_extraido)) > 5:
+        if cnpj_extraido and len(str(cnpj_extraido)) >= 11:
             val = validar_cnpj_real(cnpj_extraido)
-            if val["valido"]:
-                verificacoes.append({
-                    "titulo": "Consulta Receita Federal (BrasilAPI)",
-                    "status": "encontrado",
-                    "detalhe": f"CNPJ Ativo: {val['nome']}"
-                })
-            else:
-                probabilidade = max(probabilidade, 85)
-                verificacoes.append({
-                    "titulo": "Consulta Receita Federal (BrasilAPI)",
-                    "status": "alerta",
-                    "detalhe": f"Alerta: CNPJ {val['status']}"
-                })
+            status_verificacao = "encontrado" if val["valido"] else "alerta"
+            if not val["valido"]: probabilidade = max(probabilidade, 85)
+            
+            verificacoes.append({
+                "titulo": "Consulta Receita Federal (BrasilAPI)",
+                "status": status_verificacao,
+                "detalhe": f"{val['nome'] or 'CNPJ'} - {val['status']}"
+            })
         else:
             verificacoes.append({
                 "titulo": "Consulta de CNPJ",
                 "status": "nao_encontrado",
-                "detalhe": "Nenhum CNPJ legível identificado no documento."
+                "detalhe": "CNPJ não identificado ou inválido para consulta automática."
             })
 
         return {
             "protocolo": f"REQ-{uuid.uuid4().hex[:8].upper()}",
             "status": "analisado",
             "probabilidade_fraude": probabilidade,
-            "resumo": res_ia.get("resumo", "Análise concluída com sucesso."),
+            "resumo": res_ia.get("resumo", "Análise concluída."),
             "dados_chave": res_ia.get("dados_chave", []),
             "verificacoes_oficiais": verificacoes,
             "alertas": res_ia.get("alertas", []),
-            "proximos_passos": res_ia.get("proximos_passos", ["Aprovação automática sugerida."])
+            "proximos_passos": res_ia.get("proximos_passos", [])
         }
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Erro interno: {str(e)}")
