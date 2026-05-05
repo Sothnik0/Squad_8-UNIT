@@ -2,21 +2,21 @@
   <div class="min-h-screen bg-gray-50 p-8 text-slate-700">
     <div class="mx-auto max-w-5xl">
       <header class="mb-8">
-        <h1 class="text-2xl font-bold text-slate-800">Análise de Documento</h1>
-        <p class="text-sm text-slate-500">Solicite a análise técnica e acompanhe as evidências encontradas.</p>
+        <h1 class="text-2xl font-bold text-slate-800">Analise de Documento</h1>
+        <p class="text-sm text-slate-500">Envie o arquivo, acompanhe o score e veja exatamente o que levou o sistema a essa conclusao.</p>
       </header>
 
       <div class="mb-6 flex items-center gap-3 rounded-lg border border-blue-100 bg-blue-50 p-3">
         <span class="text-lg font-bold text-red-500">*</span>
-        <p class="text-sm font-medium text-blue-700">Este símbolo indica campo obrigatório</p>
+        <p class="text-sm font-medium text-blue-700">Este simbolo indica campo obrigatorio</p>
       </div>
 
       <div class="mb-6 rounded-xl border border-gray-100 bg-white p-8 shadow-sm">
-        <h3 class="mb-6 text-lg font-semibold">Informações da Solicitação</h3>
+        <h3 class="mb-6 text-lg font-semibold">Informacoes da Solicitacao</h3>
 
         <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
           <div class="space-y-2">
-            <label class="text-sm font-medium">Nome do Solicitante *</label>
+            <label class="text-sm font-medium">Nome do solicitante *</label>
             <input
               v-model="nomeSolicitante"
               type="text"
@@ -32,31 +32,32 @@
             <input
               v-model="departamento"
               type="text"
-              placeholder="Ex: Secretaria Acadêmica"
+              placeholder="Ex: Secretaria Academica"
               class="w-full rounded-lg border border-gray-200 bg-gray-50 p-3 outline-none transition focus:ring-2 focus:ring-blue-500"
             />
           </div>
 
           <div class="space-y-2">
-            <label class="text-sm font-medium">Tipo de Documento *</label>
+            <label class="text-sm font-medium">Tipo de documento *</label>
             <select
               v-model="tipoDocumento"
               class="w-full rounded-lg border bg-gray-50 p-3 outline-none transition"
               :class="erros.tipo ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-200 focus:ring-2 focus:ring-blue-500'"
             >
               <option value="">Selecione</option>
-              <option value="certificado">Certificado Técnico</option>
-              <option value="identidade">Documento de Identidade</option>
+              <option value="atestado_medico">Atestado medico</option>
+              <option value="certificado_ensino_medio">Certificado de conclusao do ensino medio</option>
+              <option value="historico_escolar">Historico escolar</option>
             </select>
             <p v-if="erros.tipo" class="text-xs font-medium text-red-500">{{ erros.tipo }}</p>
           </div>
 
           <div class="space-y-2">
-            <label class="text-sm font-medium">Descrição Adicional</label>
+            <label class="text-sm font-medium">Descricao adicional</label>
             <input
               v-model="descricao"
               type="text"
-              placeholder="Informações extras sobre o documento"
+              placeholder="Informacoes extras sobre o documento"
               class="w-full rounded-lg border border-gray-200 bg-gray-50 p-3 outline-none transition focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -64,9 +65,9 @@
       </div>
 
       <div
-        @click="triggerFile"
         class="group mb-4 cursor-pointer rounded-xl border-2 border-dashed bg-white p-12 text-center transition-all"
         :class="erros.arquivo ? 'border-red-400 bg-red-50' : 'border-gray-200 hover:border-blue-400 hover:bg-blue-50'"
+        @click="triggerFile"
       >
         <input ref="fileInput" type="file" class="hidden" accept=".pdf,.jpg,.jpeg,.png" @change="onFileChange" />
 
@@ -77,7 +78,7 @@
             </svg>
           </div>
           <p class="text-lg font-medium">Clique para selecionar o documento</p>
-          <p class="mt-1 text-sm text-gray-400">PDF, JPG, JPEG, PNG (máx. 10MB)</p>
+          <p class="mt-1 text-sm text-gray-400">PDF, JPG, JPEG, PNG (max. 10MB)</p>
         </div>
 
         <div v-else class="flex flex-col items-center font-medium text-green-600">
@@ -106,16 +107,13 @@
           @click="startAnalysis"
         >
           <span v-if="isAnalyzing" class="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
-          {{ isAnalyzing ? 'Analisando...' : 'Analisar Documento' }}
+          {{ isAnalyzing ? 'Analisando...' : 'Analisar documento' }}
         </button>
       </div>
 
       <transition name="fade">
         <div v-if="isAnalyzed && !isAnalyzing && analysisResult" class="mt-10 space-y-6 pb-20">
-          <div
-            class="flex flex-col gap-4 rounded-xl border p-6 shadow-sm md:flex-row md:items-start md:justify-between"
-            :class="riskTone"
-          >
+          <div class="flex flex-col gap-4 rounded-xl border p-6 shadow-sm md:flex-row md:items-start md:justify-between" :class="riskTone">
             <div class="flex-1">
               <p class="mb-1 text-xs font-bold uppercase tracking-widest">Protocolo {{ analysisResult.protocolo }}</p>
               <h3 class="text-lg font-bold leading-tight">Probabilidade de fraude</h3>
@@ -127,6 +125,13 @@
             </div>
           </div>
 
+          <div class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
+            <h4 class="mb-3 font-bold text-slate-800">O que pesou no score</h4>
+            <ul class="space-y-2 text-sm text-slate-600">
+              <li v-for="factor in analysisResult.fatores_score" :key="factor">{{ factor }}</li>
+            </ul>
+          </div>
+
           <div v-if="analysisResult.alertas.length" class="rounded-xl border border-amber-200 bg-amber-50 p-5">
             <h4 class="mb-3 font-bold text-amber-900">Alertas</h4>
             <ul class="space-y-2 text-sm text-amber-800">
@@ -136,7 +141,7 @@
 
           <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
             <section class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
-              <h4 class="mb-4 font-bold text-slate-800">Dados-chave</h4>
+              <h4 class="mb-4 font-bold text-slate-800">Dados encontrados e pendencias</h4>
               <div class="space-y-3">
                 <div v-for="item in analysisResult.dados_chave" :key="item.titulo" class="rounded-lg border border-gray-100 p-4">
                   <div class="mb-2 flex items-center justify-between gap-3">
@@ -151,7 +156,7 @@
             </section>
 
             <section class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
-              <h4 class="mb-4 font-bold text-slate-800">Verificações oficiais</h4>
+              <h4 class="mb-4 font-bold text-slate-800">Verificacoes executadas</h4>
               <div class="space-y-3">
                 <div v-for="item in analysisResult.verificacoes_oficiais" :key="item.titulo" class="rounded-lg border border-gray-100 p-4">
                   <div class="mb-2 flex items-center justify-between gap-3">
@@ -166,29 +171,42 @@
             </section>
           </div>
 
+          <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
+            <section class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
+              <h4 class="mb-2 font-bold text-slate-800">Camada de extracao</h4>
+              <p class="text-sm text-slate-500">Origem principal dos dados exibidos no relatorio.</p>
+              <div class="mt-4 rounded-lg border border-blue-100 bg-blue-50 p-4">
+                <p class="text-xs font-bold uppercase tracking-widest text-blue-700">Motor utilizado</p>
+                <p class="mt-1 text-sm font-semibold text-blue-900">{{ analysisResult.motor_extracao }}</p>
+              </div>
+            </section>
+
+            <section class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
+              <h4 class="mb-2 font-bold text-slate-800">Texto extraido do documento</h4>
+              <p class="text-sm text-slate-500">Trecho bruto lido pelo OCR para voce conferir se a leitura bate com a imagem.</p>
+              <pre class="mt-4 max-h-72 overflow-auto rounded-lg bg-slate-950 p-4 text-xs leading-relaxed text-slate-100 whitespace-pre-wrap">{{ analysisResult.texto_extraido || 'Nenhum texto OCR disponivel.' }}</pre>
+            </section>
+          </div>
+
           <div class="rounded-xl border border-gray-100 bg-white p-6 shadow-sm">
-            <h4 class="mb-3 font-bold text-slate-800">Próximos passos técnicos</h4>
+            <h4 class="mb-3 font-bold text-slate-800">Proximos passos tecnicos</h4>
             <ul class="space-y-2 text-sm text-slate-600">
               <li v-for="step in analysisResult.proximos_passos" :key="step">{{ step }}</li>
             </ul>
           </div>
 
           <div class="grid grid-cols-1 gap-4 pt-4 md:grid-cols-2">
-            <button class="rounded-xl bg-emerald-600 py-4 font-bold text-white shadow-lg transition-all hover:bg-emerald-700">
-              Aceitar Documento
-            </button>
-            <button class="rounded-xl bg-rose-600 py-4 font-bold text-white shadow-lg transition-all hover:bg-rose-700">
-              Rejeitar Documento
-            </button>
+            <button class="rounded-xl bg-emerald-600 py-4 font-bold text-white shadow-lg transition-all hover:bg-emerald-700">Aceitar documento</button>
+            <button class="rounded-xl bg-rose-600 py-4 font-bold text-white shadow-lg transition-all hover:bg-rose-700">Rejeitar documento</button>
           </div>
 
           <div class="flex flex-col items-center justify-between gap-4 rounded-2xl bg-blue-600 p-6 shadow-xl md:flex-row">
             <div class="text-white">
-              <h4 class="text-lg font-bold text-white">Perícia manual</h4>
-              <p class="text-sm text-blue-100">Visualize o documento e valide nos links oficiais.</p>
+              <h4 class="text-lg font-bold text-white">Pericia manual</h4>
+              <p class="text-sm text-blue-100">Visualize o documento e confira manualmente os sinais de autenticidade.</p>
             </div>
             <button class="rounded-xl bg-white px-8 py-3 font-bold text-blue-600 shadow-sm transition-colors hover:bg-blue-50" @click="openManualAnalysis">
-              Visualizar e Periciar
+              Visualizar documento
             </button>
           </div>
         </div>
@@ -199,7 +217,7 @@
           <div class="flex items-center justify-between border-b bg-slate-50 p-4">
             <div>
               <h3 class="font-bold text-slate-800">Visualizando: {{ file?.name }}</h3>
-              <p class="text-xs italic text-slate-500">Analise o documento antes de tomar sua decisão final.</p>
+              <p class="text-xs italic text-slate-500">Confira o documento antes de tomar a decisao final.</p>
             </div>
             <button class="rounded-lg bg-slate-200 px-6 py-2 font-bold text-slate-600 transition hover:bg-slate-300" @click="showDocModal = false">Fechar</button>
           </div>
@@ -208,14 +226,12 @@
               <iframe :src="fileUrl" class="h-full w-full border-none"></iframe>
             </div>
             <div class="flex w-full flex-col gap-4 overflow-y-auto border-l bg-white p-6 md:w-72">
-              <h4 class="text-xs font-bold uppercase tracking-widest text-slate-400">Validadores</h4>
-              <RouterLink to="/links" target="_blank" class="rounded-xl border border-blue-100 bg-blue-50 p-3 text-center text-sm font-bold text-blue-700 transition hover:bg-blue-100">
-                Abrir Central de Links
-              </RouterLink>
-              <div class="mt-4 rounded-lg bg-slate-50 p-4 text-xs leading-relaxed text-slate-500">
-                <strong>Dica de perícia:</strong><br /><br />
-                1. Verifique se o nome no documento coincide com o solicitado.<br /><br />
-                2. Consulte assinaturas e selos de autenticidade nos sites oficiais.
+              <h4 class="text-xs font-bold uppercase tracking-widest text-slate-400">Checklist rapido</h4>
+              <div class="rounded-xl border border-slate-100 bg-slate-50 p-4 text-xs leading-relaxed text-slate-600">
+                1. Confira se o nome bate com a solicitacao.<br /><br />
+                2. Verifique assinatura, carimbo, selo e data.<br /><br />
+                3. Para escola, confira se instituicao e CNPJ parecem coerentes.<br /><br />
+                4. Para atestado, confira medico, CRM e periodo.
               </div>
             </div>
           </div>
@@ -259,7 +275,7 @@ const riskTone = computed(() => {
 const statusLabel = (status: AnalysisFinding['status']) => {
   const labels = {
     encontrado: 'Encontrado',
-    nao_encontrado: 'Não achou',
+    nao_encontrado: 'Nao encontrado',
     pendente: 'Pendente',
     alerta: 'Alerta',
   }
