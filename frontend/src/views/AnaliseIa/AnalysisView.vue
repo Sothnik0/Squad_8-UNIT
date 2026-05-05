@@ -45,10 +45,13 @@
               :class="erros.tipo ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-200 focus:ring-2 focus:ring-blue-500'"
             >
               <option value="">Selecione</option>
+              <option value="atestado">Atestado Médico</option>
+              <option value="historico">Histórico Escolar</option>
               <option value="certificado">Certificado Técnico</option>
-              <option value="identidade">Documento de Identidade</option>
-            </select>
-            <p v-if="erros.tipo" class="text-xs font-medium text-red-500">{{ erros.tipo }}</p>
+              <option value="identidade">Documento de Identidade (RG/CNH)</option>
+              <option value="outro">Outro Tipo</option>
+             </select>
+             <p v-if="erros.tipo" class="text-xs font-medium text-red-500">{{ erros.tipo }}</p>
           </div>
 
           <div class="space-y-2">
