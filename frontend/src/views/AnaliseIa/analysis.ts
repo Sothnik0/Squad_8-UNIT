@@ -18,6 +18,8 @@ export interface AnalysisResult {
   alertas: string[]
   fatores_score: string[]
   proximos_passos: string[]
+  motor_extracao?: string
+  texto_extraido?: string 
 }
 
 const API_URL = import.meta.env.VITE_API_URL ?? 'http://127.0.0.1:8000'
