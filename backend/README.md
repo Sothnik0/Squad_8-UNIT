@@ -5,7 +5,7 @@ Este é o servidor backend do projeto da Squad 8 (UNIT), desenvolvido em **Pytho
 ## 🚀 Tecnologias Utilizadas
 
 * **FastAPI**: Framework web de construção de APIs de alta performance.
-* **Google Gemini API (2.0 Flash)**: Inteligência Artificial para análise visual e extração de dados.
+* **Google Gemini API**: Inteligência Artificial para análise visual e extração de dados.
 * **Pydantic**: Validação de dados e tipagem estática.
 * **Uvicorn**: Servidor ASGI leve e rápido para rodar a aplicação em Python.
 * **BrasilAPI**: Integração para validação de status de CNPJs em tempo real.
@@ -48,7 +48,9 @@ Para que o sistema consiga se comunicar com a inteligência artificial, você pr
 1. **Na raiz da pasta backend, crie um arquivo chamado .env.**
 
 2. **Adicione a seguinte linha dentro dele, substituindo pela sua chave real**
-    GEMINI_API_KEY=SUA_CHAVE_AQUI
+    OCR_API_KEY=SUA_CHAVE_OCR_SPACE
+    GEMINI_API_KEY=SUA_CHAVE_GEMINI
+    GEMINI_MODEL=gemini-2.5-flash-lite
 
 
 ## 🏃 Como Rodar o Servidor
