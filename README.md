@@ -134,7 +134,9 @@ pip install -r requirements.txt
 5. Configure o arquivo `.env`:
 
 ```
-GEMINI_API_KEY=sua_chave_aqui
+OCR_API_KEY=sua_chave_ocr_space
+GEMINI_API_KEY=sua_chave_gemini
+GEMINI_MODEL=gemini-2.5-flash-lite
 ```
 
 6. Rode o servidor:

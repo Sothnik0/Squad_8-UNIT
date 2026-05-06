@@ -11,9 +11,9 @@ from typing import Any
 
 GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models'
 OCR_SPACE_URL = 'https://api.ocr.space/parse/image'
-CNPJA_URL = 'https://open.cnpja.com/office'
+BRASILAPI_CNPJ_URL = 'https://brasilapi.com.br/api/cnpj/v1'
 VIACEP_URL = 'https://viacep.com.br/ws'
-DEFAULT_GEMINI_MODEL = os.getenv('AI_MODEL', os.getenv('GEMINI_MODEL', 'gemini-2.5-flash-lite'))
+DEFAULT_GEMINI_MODEL = os.getenv('GEMINI_MODEL', '').strip() or os.getenv('AI_MODEL', '').strip()
 
 
 DOCUMENT_SPECS = {
@@ -279,6 +279,7 @@ def parse_medical_certificate_ocr(raw_text: str) -> dict[str, Any]:
         'reference_data': {
             'institution_name': institution_name,
             'cnpj': '',
+            'cpf': only_digits(cpf),
             'cep': cep,
             'crm_number': crm_number,
             'crm_state': 'SE' if 'crm/se' in lowered_text or 'sergipe' in lowered_text else '',
@@ -340,7 +341,7 @@ def analyze_with_gemini(
     mime_type: str,
     file_data_base64: str,
 ) -> dict[str, Any]:
-    if not api_key or (not ocr_text and not file_data_base64):
+    if not api_key or not DEFAULT_GEMINI_MODEL or (not ocr_text and not file_data_base64):
         return {'alerts': [], 'score_factors': [], 'recommended_checks': [], 'extracted_fields': [], 'reference_data': {}}
 
     prompt = build_gemini_prompt(
@@ -485,6 +486,7 @@ def run_relevant_verifications(*, tipo_documento: str, combined_output: dict[str
     cep = only_digits(reference_data.get('cep', ''))
     crm_number = only_digits(reference_data.get('crm_number', ''))
     crm_state = clean_text(reference_data.get('crm_state', '')).upper()
+    cpf = only_digits(reference_data.get('cpf', ''))
 
     results: list[VerificationResult] = []
     if tipo_documento in {'certificado_ensino_medio', 'historico_escolar'}:
@@ -492,6 +494,7 @@ def run_relevant_verifications(*, tipo_documento: str, combined_output: dict[str
         results.append(verify_cnpj_free(cnpj=cnpj, institution_name=institution_name, extraction_failed=extraction_failed))
         results.append(verify_cep_free(cep=cep, extraction_failed=extraction_failed))
     if tipo_documento == 'atestado_medico':
+        results.append(verify_cpf_local(cpf=cpf, extraction_failed=extraction_failed))
         results.append(verify_crm_presence(crm_number=crm_number, crm_state=crm_state, extraction_failed=extraction_failed))
     return results
 
@@ -505,7 +508,7 @@ def verify_institution_name(*, institution_name: str, extraction_failed: bool) -
 
 
 def verify_cnpj_free(*, cnpj: str, institution_name: str, extraction_failed: bool) -> VerificationResult:
-    title = 'Consulta CNPJ da escola'
+    title = 'Consulta CNPJ da escola (BrasilAPI)'
     if not cnpj:
         if extraction_failed:
             return VerificationResult(title, 'pendente', 'A verificacao do CNPJ ficou pendente.')
@@ -515,19 +518,21 @@ def verify_cnpj_free(*, cnpj: str, institution_name: str, extraction_failed: boo
     if not is_valid_cnpj(cnpj):
         return VerificationResult(title, 'alerta', 'O CNPJ extraido possui digitos verificadores invalidos.')
     try:
-        data = get_json(url=f'{CNPJA_URL}/{cnpj}', query=None, timeout=30)
+        data = get_json(url=f'{BRASILAPI_CNPJ_URL}/{cnpj}', query=None, timeout=30)
     except urllib.error.HTTPError as exc:
         if exc.code == 404:
-            return VerificationResult(title, 'nao_encontrado', 'O CNPJ extraido nao foi localizado na base publica consultada.')
-        return VerificationResult(title, 'alerta', read_http_error(exc) or f'Falha HTTP {exc.code} na consulta de CNPJ.')
+            return VerificationResult(title, 'nao_encontrado', 'O CNPJ extraido nao foi localizado na BrasilAPI.')
+        return VerificationResult(title, 'alerta', read_http_error(exc) or f'Falha HTTP {exc.code} na consulta de CNPJ pela BrasilAPI.')
     except Exception as exc:  # noqa: BLE001
-        return VerificationResult(title, 'pendente', f'Nao foi possivel concluir a consulta publica do CNPJ: {exc}')
+        return VerificationResult(title, 'pendente', f'Nao foi possivel concluir a consulta publica do CNPJ pela BrasilAPI: {exc}')
 
-    official_name = clean_text(data.get('company', {}).get('name') or data.get('alias') or data.get('name') or '')
+    official_name = clean_text(data.get('razao_social') or data.get('nome_fantasia') or '')
+    official_status = clean_text(data.get('descricao_situacao_cadastral') or '')
+    if official_status and official_status.upper() != 'ATIVA':
+        return VerificationResult(title, 'alerta', f'CNPJ localizado na BrasilAPI, mas a situacao cadastral retornou {official_status}.')
     if institution_name and official_name and institution_name.lower() not in official_name.lower() and official_name.lower() not in institution_name.lower():
-        return VerificationResult(title, 'alerta', f'CNPJ localizado, mas o nome retornado ({official_name}) diverge do nome extraido ({institution_name}).')
-    return VerificationResult(title, 'encontrado', f"CNPJ localizado na base publica. Nome oficial: {official_name or 'nao informado'}.")
-
+        return VerificationResult(title, 'alerta', f'CNPJ localizado na BrasilAPI, mas o nome retornado ({official_name}) diverge do nome extraido ({institution_name}).')
+    return VerificationResult(title, 'encontrado', f"CNPJ localizado na BrasilAPI. Situacao: {official_status or 'nao informada'}. Nome oficial: {official_name or 'nao informado'}.")
 
 def verify_cep_free(*, cep: str, extraction_failed: bool) -> VerificationResult:
     title = 'Consulta CEP'
@@ -546,6 +551,17 @@ def verify_cep_free(*, cep: str, extraction_failed: bool) -> VerificationResult:
     if data.get('erro') is True:
         return VerificationResult(title, 'nao_encontrado', 'O CEP extraido nao foi localizado no ViaCEP.')
     return VerificationResult(title, 'encontrado', f"CEP localizado: {data.get('logradouro', 'logradouro nao informado')}, {data.get('bairro', 'bairro nao informado')} - {data.get('localidade', '')}/{data.get('uf', '')}.")
+
+
+def verify_cpf_local(*, cpf: str, extraction_failed: bool) -> VerificationResult:
+    title = 'Validacao local do CPF'
+    if not cpf:
+        if extraction_failed:
+            return VerificationResult(title, 'pendente', 'A verificacao do CPF ficou pendente porque a extracao nao foi concluida.')
+        return VerificationResult(title, 'nao_encontrado', 'Nenhum CPF foi identificado no documento.')
+    if not is_valid_cpf(cpf):
+        return VerificationResult(title, 'alerta', 'O CPF extraido possui digitos verificadores invalidos.')
+    return VerificationResult(title, 'encontrado', 'CPF extraido possui formato e digitos verificadores validos.')
 
 
 def verify_crm_presence(*, crm_number: str, crm_state: str, extraction_failed: bool) -> VerificationResult:
@@ -820,6 +836,20 @@ def dedupe_strings(values: list[str]):
 
 def is_valid_cep(cep: str) -> bool:
     return len(cep) == 8 and cep.isdigit()
+
+
+def is_valid_cpf(cpf: str) -> bool:
+    if len(cpf) != 11 or len(set(cpf)) == 1:
+        return False
+    numbers = [int(char) for char in cpf]
+    for digit_index in (9, 10):
+        total = sum(numbers[i] * ((digit_index + 1) - i) for i in range(digit_index))
+        digit = (total * 10) % 11
+        if digit == 10:
+            digit = 0
+        if numbers[digit_index] != digit:
+            return False
+    return True
 
 
 def is_valid_cnpj(cnpj: str) -> bool:
