@@ -1,6 +1,8 @@
 import json
+import logging
 import os
 import re
+import time
 import unicodedata
 import urllib.error
 import urllib.parse
@@ -8,6 +10,7 @@ import urllib.request
 from dataclasses import dataclass
 from typing import Any
 
+logger = logging.getLogger(__name__)
 
 GEMINI_API_BASE = 'https://generativelanguage.googleapis.com/v1beta/models'
 OCR_SPACE_URL = 'https://api.ocr.space/parse/image'
@@ -62,6 +65,7 @@ def build_analysis(
     mime_type: str,
     file_data_base64: str,
     file_size_bytes: int,
+    corr_id: str,
 ) -> AnalysisPayload:
     document_type = tipo_documento if tipo_documento in DOCUMENT_SPECS else 'historico_escolar'
 
@@ -70,6 +74,7 @@ def build_analysis(
         file_name=file_name,
         mime_type=mime_type,
         file_data_base64=file_data_base64,
+        corr_id=corr_id,
     )
     gemini_output = analyze_with_gemini(
         api_key=get_gemini_key(),
@@ -80,6 +85,7 @@ def build_analysis(
         ocr_text=ocr_output.get('raw_text', ''),
         mime_type=mime_type,
         file_data_base64=file_data_base64,
+        corr_id=corr_id,
     )
     combined = merge_analysis_outputs(document_type=document_type, ocr_output=ocr_output, gemini_output=gemini_output)
     extraction_failed = not combined.get('extracted_fields')
@@ -139,9 +145,10 @@ def get_ocr_key() -> str:
     return os.getenv('OCR_API_KEY', '').strip()
 
 
-def analyze_with_ocr_space(*, tipo_documento: str, file_name: str, mime_type: str, file_data_base64: str) -> dict[str, Any]:
+def analyze_with_ocr_space(*, tipo_documento: str, file_name: str, mime_type: str, file_data_base64: str, corr_id: str) -> dict[str, Any]:
     api_key = get_ocr_key()
     if not api_key:
+        logger.warning(f"[{corr_id}] Extração: OCR_API_KEY não configurada no backend.")
         return {
             'summary': 'OCR nao configurado no backend.',
             'raw_text': '',
@@ -153,6 +160,9 @@ def analyze_with_ocr_space(*, tipo_documento: str, file_name: str, mime_type: st
             'fraud_probability': 25,
             'score_factors': ['Nao houve OCR automatico disponivel para ler o documento.'],
         }
+
+    logger.info(f"[{corr_id}] Extração: Iniciando leitura do documento via OCR.space...")
+    start_time = time.time()
 
     payload = urllib.parse.urlencode({
         'apikey': api_key,
@@ -170,6 +180,7 @@ def analyze_with_ocr_space(*, tipo_documento: str, file_name: str, mime_type: st
         with urllib.request.urlopen(request, timeout=90) as response:
             parsed = json.loads(response.read().decode('utf-8'))
     except urllib.error.HTTPError as exc:
+        logger.warning(f"[{corr_id}] Extração: Falha HTTP {exc.code} ao consultar OCR.space.")
         return {
             'summary': 'O OCR falhou durante a leitura do documento.',
             'raw_text': '',
@@ -182,6 +193,7 @@ def analyze_with_ocr_space(*, tipo_documento: str, file_name: str, mime_type: st
             'score_factors': ['A leitura OCR nao conseguiu extrair o conteudo do documento.'],
         }
     except Exception as exc:  # noqa: BLE001
+        logger.warning(f"[{corr_id}] Extração: Erro na integração com OCR.space: {exc}")
         return {
             'summary': 'O OCR falhou antes de concluir a leitura do documento.',
             'raw_text': '',
@@ -201,7 +213,10 @@ def analyze_with_ocr_space(*, tipo_documento: str, file_name: str, mime_type: st
             text_parts.append(text)
 
     raw_text = '\n'.join(text_parts).strip()
+    exec_time = round(time.time() - start_time, 2)
+    
     if not raw_text:
+        logger.warning(f"[{corr_id}] Extração: OCR executado ({exec_time}s), mas documento ilegível (sem texto extraído).")
         return {
             'summary': 'OCR executado, mas sem texto legivel suficiente.',
             'raw_text': '',
@@ -213,6 +228,8 @@ def analyze_with_ocr_space(*, tipo_documento: str, file_name: str, mime_type: st
             'fraud_probability': 35,
             'score_factors': ['O OCR nao encontrou texto suficiente para sustentar a analise.'],
         }
+
+    logger.info(f"[{corr_id}] Extração: Fim da leitura do documento via OCR.space. Tempo: {exec_time}s.")
 
     if tipo_documento == 'atestado_medico':
         return parse_medical_certificate_ocr(raw_text)
@@ -340,9 +357,14 @@ def analyze_with_gemini(
     ocr_text: str,
     mime_type: str,
     file_data_base64: str,
+    corr_id: str,
 ) -> dict[str, Any]:
     if not api_key or not DEFAULT_GEMINI_MODEL or (not ocr_text and not file_data_base64):
+        logger.info(f"[{corr_id}] IA: Processamento com Gemini ignorado (falta chave, modelo ou dados).")
         return {'alerts': [], 'score_factors': [], 'recommended_checks': [], 'extracted_fields': [], 'reference_data': {}}
+
+    logger.info(f"[{corr_id}] IA: Iniciando inferência com modelo Gemini...")
+    start_time = time.time()
 
     prompt = build_gemini_prompt(
         solicitante=solicitante,
@@ -363,6 +385,7 @@ def analyze_with_gemini(
     try:
         raw_response = post_json(url=url, payload=payload, headers={}, timeout=90)
     except urllib.error.HTTPError as exc:
+        logger.warning(f"[{corr_id}] IA: Falha HTTP {exc.code} ao consultar o Gemini.")
         return {
             'alerts': [read_http_error(exc) or f'Falha HTTP {exc.code} ao consultar o Gemini.'],
             'score_factors': ['A etapa de interpretacao com Gemini nao conseguiu concluir a leitura do OCR.'],
@@ -371,6 +394,7 @@ def analyze_with_gemini(
             'reference_data': {},
         }
     except Exception as exc:  # noqa: BLE001
+        logger.warning(f"[{corr_id}] IA: Erro na integração com Gemini: {exc}")
         return {
             'alerts': [f'Erro na integracao com Gemini: {exc}'],
             'score_factors': ['A etapa de interpretacao com Gemini falhou e o sistema seguiu com OCR puro.'],
@@ -383,6 +407,7 @@ def analyze_with_gemini(
     try:
         parsed = json.loads(output_text)
     except json.JSONDecodeError:
+        logger.warning(f"[{corr_id}] IA: A resposta do Gemini não veio em JSON válido.")
         return {
             'alerts': ['A resposta do Gemini nao veio em JSON valido.'],
             'score_factors': ['O Gemini respondeu fora do formato esperado; mantendo resultado baseado no OCR.'],
@@ -390,6 +415,10 @@ def analyze_with_gemini(
             'extracted_fields': [],
             'reference_data': {},
         }
+
+    exec_time = round(time.time() - start_time, 2)
+    fraud_prob = parsed.get('fraud_probability', 0)
+    logger.info(f"[{corr_id}] IA: Fim da inferência com Gemini. Tempo: {exec_time}s. Confidence Score (Probabilidade de Fraude): {fraud_prob}%.")
 
     parsed.setdefault('alerts', [])
     parsed.setdefault('score_factors', [])

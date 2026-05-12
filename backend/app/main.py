@@ -1,13 +1,23 @@
 import base64
+import logging
+import time
+import uuid
 from datetime import datetime, timezone
 from typing import Literal
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
 from app import config  # noqa: F401
 from app.services.document_analysis import build_analysis
+
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s | %(levelname)s | %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
+logger = logging.getLogger(__name__)
 
 
 app = FastAPI(title="Verify API")
@@ -77,8 +87,12 @@ def home():
 
 
 @app.post("/analises/documento", response_model=AnalysisResponse)
-def analyze_document(payload: AnalysisRequest):
+def analyze_document(payload: AnalysisRequest, request: Request):
+    corr_id = request.headers.get("X-Correlation-ID") or str(uuid.uuid4())
     file = payload.arquivo
+    
+    logger.info(f"[{corr_id}] Recepcao: Arquivo '{file.nome}' recebido. Tamanho: {file.tamanho_bytes} bytes. Extensao/MIME: {file.tipo_mime}.")
+
     if file.tipo_mime not in ALLOWED_MIME_TYPES:
         raise HTTPException(
             status_code=400,
@@ -110,7 +124,11 @@ def analyze_document(payload: AnalysisRequest):
         mime_type=file.tipo_mime,
         file_data_base64=file.conteudo_base64,
         file_size_bytes=file.tamanho_bytes,
+        corr_id=corr_id,
     )
+
+    veredicto_final = "Falso/Alerta" if report.probabilidade_fraude >= 60 else "Veridico/Seguro"
+    logger.info(f"[{corr_id}] Veredito: {veredicto_final}. Probabilidade de fraude: {report.probabilidade_fraude}%. Fatores: {', '.join(report.fatores_score)}")
 
     return AnalysisResponse(
         protocolo=report.protocolo,

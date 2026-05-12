@@ -107,9 +107,13 @@ export const startAnalysis = async () => {
 
   try {
     const conteudoBase64 = await fileToBase64(file.value)
+    const correlationId = crypto.randomUUID()
     const response = await fetch(`${API_URL}/analises/documento`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 
+        'Content-Type': 'application/json',
+        'X-Correlation-ID': correlationId
+      },
       body: JSON.stringify({
         solicitante: nomeSolicitante.value,
         departamento: departamento.value,
