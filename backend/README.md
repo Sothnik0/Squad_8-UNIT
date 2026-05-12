@@ -9,6 +9,16 @@ Este é o servidor backend do projeto da Squad 8 (UNIT), desenvolvido em **Pytho
 * **Pydantic**: Validação de dados e tipagem estática.
 * **Uvicorn**: Servidor ASGI leve e rápido para rodar a aplicação em Python.
 * **BrasilAPI**: Integração para validação de status de CNPJs em tempo real.
+* **Ocr_space**: Extração dos campos para validaçào
+* **ViaCEP**: Validaçào de localidades
+
+---
+
+## Observacoes
+
+- O backend usa variaveis de ambiente em `backend/.env`.
+- Para OCR, configure `OCR_API_KEY`.
+- A camada complementar de IA pode usar `GEMINI_API_KEY` ou `GOOGLE_API_KEY` quando houver quota disponivel.
 
 ---
 
@@ -67,3 +77,5 @@ Com o ambiente ativado e as dependências instaladas, inicie o servidor executan
 Com o servidor rodando em um terminal, abra outro terminal, ative o .venv e rode o teste:
 
     python app/testar_api.py
+
+
