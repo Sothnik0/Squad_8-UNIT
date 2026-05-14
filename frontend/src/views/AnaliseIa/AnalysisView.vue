@@ -32,15 +32,14 @@
             <label class="text-sm font-medium">Tipo de documento *</label>
             <select
               v-model="tipoDocumento"
-              class="w-full rounded-lg border bg-gray-50 p-3 outline-none transition"
-              :class="erros.tipo ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-200 focus:ring-2 focus:ring-blue-500'"
+              class="w-full rounded-lg border border-gray-200 bg-gray-50 p-3 outline-none focus:border-blue-500"
+              :class="{ 'border-red-500': erros.tipoDocumento }"
             >
-              <option value="">Selecione</option>
-              <option value="atestado_medico">Atestado médico</option>
-              <option value="certificado_ensino_medio">Certificado de conclusão do ensino médio</option>
-              <option value="historico_escolar">Histórico escolar</option>
-            </select>
-            <p v-if="erros.tipo" class="text-xs font-medium text-red-500">{{ erros.tipo }}</p>
+              <option value="">Selecione o tipo</option>
+              <option value="atestado_medico">Atestado Médico</option>
+              <option value="certificado_ensino_medio">Certificado de Ensino Médio</option>
+              <option value="historico_escolar">Histórico Escolar</option>
+          </select>
           </div>
 
           <div class="space-y-2">
@@ -94,6 +93,21 @@
         </div>
       </div>
 
+      # Bloco do  Scanner Virtual
+      <div v-if="isAnalyzing" class="relative overflow-hidden rounded-xl border border-blue-500/30 bg-slate-900 p-8 text-center shadow-2xl mb-6">
+          <div class="relative z-10">
+             <div class="mb-4 flex justify-center">
+               <div class="h-12 w-12 animate-spin rounded-full border-4 border-blue-400 border-t-transparent"></div>
+            </div>
+            <h3 class="text-lg font-bold text-white">Scanner IA Ativado</h3>
+            <p class="text-xs text-blue-300">Cruzando dados com BrasilAPI e analisando fraudes com Gemini 2.0...</p>
+       </div>
+  
+       <div class="absolute inset-0 z-0 pointer-events-none">
+         <div class="scanner-line"></div>
+       </div>
+      </div>
+      
       <!-- Ação Principal -->
       <div class="mb-8 flex">
         <button
