@@ -1,4 +1,5 @@
 import base64
+import time  # <--- ADICIONADO: Para medir o tempo de resposta
 from datetime import datetime, timezone
 from typing import Literal
 
@@ -8,7 +9,6 @@ from pydantic import BaseModel, Field
 
 from app import config  # noqa: F401
 from app.services.document_analysis import build_analysis
-
 
 app = FastAPI(title="Verify API")
 
@@ -23,61 +23,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-
-class DocumentFile(BaseModel):
-    nome: str
-    tipo_mime: str
-    tamanho_bytes: int = Field(ge=1)
-    conteudo_base64: str
-
-
-class AnalysisRequest(BaseModel):
-    solicitante: str = Field(min_length=2)
-    departamento: str = ""
-    tipo_documento: Literal[
-        "atestado_medico",
-        "certificado_ensino_medio",
-        "historico_escolar",
-    ]
-    descricao: str = ""
-    arquivo: DocumentFile
-
-
-class Finding(BaseModel):
-    titulo: str
-    status: Literal["encontrado", "nao_encontrado", "pendente", "alerta"]
-    detalhe: str
-
-
-class AnalysisResponse(BaseModel):
-    protocolo: str
-    status: Literal["rascunho_tecnico", "ia_indisponivel", "analisado"]
-    probabilidade_fraude: int
-    resumo: str
-    dados_chave: list[Finding]
-    verificacoes_oficiais: list[Finding]
-    alertas: list[str]
-    fatores_score: list[str]
-    proximos_passos: list[str]
-    motor_extracao: str
-    texto_extraido: str
-
-
-ALLOWED_MIME_TYPES = {
-    "application/pdf",
-    "image/jpeg",
-    "image/png",
-}
-MAX_FILE_SIZE = 10 * 1024 * 1024
-
+# ... (Suas classes DocumentFile, AnalysisRequest, Finding e AnalysisResponse permanecem iguais)
 
 @app.get("/")
 def home():
     return {"msg": "API estruturada", "service": "Verify API"}
 
-
 @app.post("/analises/documento", response_model=AnalysisResponse)
 def analyze_document(payload: AnalysisRequest):
+    start_time = time.time()  # <--- ADICIONADO: Inicia o cronômetro
+    
     file = payload.arquivo
     if file.tipo_mime not in ALLOWED_MIME_TYPES:
         raise HTTPException(
@@ -100,6 +55,8 @@ def analyze_document(payload: AnalysisRequest):
         )
 
     protocol = datetime.now(timezone.utc).strftime("ANL-%Y%m%d-%H%M%S")
+    
+    # Chama o serviço de análise que utiliza o Gemini e OCR
     report = build_analysis(
         protocolo=protocol,
         solicitante=payload.solicitante.strip(),
@@ -111,6 +68,12 @@ def analyze_document(payload: AnalysisRequest):
         file_data_base64=file.conteudo_base64,
         file_size_bytes=file.tamanho_bytes,
     )
+
+    # <--- ADICIONADO: Lógica de Log de Auditoria
+    duration = time.time() - start_time
+    with open("auditoria_ia.log", "a") as f:
+        log_entry = f"{datetime.now()}: {protocol} | Doc: {payload.tipo_documento} | Tempo: {duration:.2f}s | Status: {report.status}\n"
+        f.write(log_entry)
 
     return AnalysisResponse(
         protocolo=report.protocolo,
