@@ -441,34 +441,31 @@ def build_summary(*, document_type: str, ocr_output: dict[str, Any], gemini_outp
 
 
 def build_gemini_prompt(*, solicitante: str, departamento: str, tipo_documento: str, descricao: str, ocr_text: str) -> str:
+    # Definição das instruções específicas por tipo
+    instrucoes_especificas = {
+        "atestado_medico": "Foque no Nome do médico, CRM, dias de afastamento e CID. Verifique carimbos e assinaturas.",
+        "certificado_ensino_medio": "Foque no Ano de Conclusão, Nome da Escola e Número de Registro GDAE/SED.",
+        "historico_escolar": "Foque na Média Global (CRA/CR) e disciplinas pendentes."
+    }
+    diretriz = instrucoes_especificas.get(tipo_documento, "Extraia os dados identificadores principais.")
+
     return f"""
-Voce esta analisando um documento submetido para validacao interna. Use a imagem/arquivo enviado como fonte principal e o OCR como apoio quando ele existir.
-Tipo informado: {DOCUMENT_SPECS[tipo_documento]['label']}
-Solicitante: {solicitante}
-Departamento: {departamento or 'Nao informado'}
-Descricao adicional: {descricao or 'Nao informada'}
+    Aja como um perito forense digital para o solicitante {solicitante}.
+    Analise o documento ({DOCUMENT_SPECS[tipo_documento]['label']}) seguindo estes passos:
+    1. DESCRIÇÃO VISUAL: Descreva o layout e elementos de segurança.
+    2. EXTRAÇÃO DE DADOS: {diretriz}
+    3. ANÁLISE DE FRAUDE: Procure manipulações digitais ou inconsistências.
 
-Texto OCR de apoio (pode estar incompleto):
-{ocr_text[:12000] if ocr_text else 'OCR indisponivel.'}
-
-Responda SOMENTE em JSON valido no formato:
-{{
-  "fraud_probability": 0,
-  "alerts": ["string"],
-  "score_factors": ["string"],
-  "recommended_checks": ["string"],
-  "reference_data": {{
-    "institution_name": "",
-    "cnpj": "",
-    "cep": "",
-    "crm_number": "",
-    "crm_state": ""
-  }},
-  "extracted_fields": [
-    {{"label": "Campo", "value": "Valor", "status": "encontrado|nao_encontrado|pendente|alerta", "confidence": 0.0}}
-  ]
-}}
-""".strip()
+    Responda APENAS em JSON:
+    {{
+      "fraud_probability": 0,
+      "alerts": ["string"],
+      "score_factors": ["string"],
+      "recommended_checks": ["string"],
+      "reference_data": {{ "institution_name": "", "cnpj": "", "cep": "", "crm_number": "", "crm_state": "" }},
+      "extracted_fields": [ {{ "label": "Campo", "value": "Valor", "status": "encontrado|alerta", "confidence": 0.0 }} ]
+    }}
+    """.strip()
 
 
 def determine_analysis_status(combined_output: dict[str, Any]) -> str:
