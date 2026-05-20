@@ -191,8 +191,18 @@
 
           <!-- Ações Finais -->
           <div class="grid grid-cols-1 gap-4 pt-4 md:grid-cols-2">
-            <button class="rounded-xl bg-emerald-600 py-4 font-bold text-white shadow-lg transition-all hover:bg-emerald-700 active:scale-95">Aceitar documento</button>
-            <button class="rounded-xl bg-rose-600 py-4 font-bold text-white shadow-lg transition-all hover:bg-rose-700 active:scale-95">Rejeitar documento</button>
+          <button
+            @click="finalizeDocument('Aprovado')"
+            class="rounded-xl bg-emerald-600 py-4 font-bold text-white shadow-lg transition-all hover:bg-emerald-700 active:scale-95"
+          >
+            Aceitar documento
+          </button>
+          <button
+            @click="finalizeDocument('Rejeitado')"
+            class="rounded-xl bg-rose-600 py-4 font-bold text-white shadow-lg transition-all hover:bg-rose-700 active:scale-95"
+          >
+            Rejeitar documento
+          </button>
           </div>
 
           <!-- CTA Perícia Manual -->
@@ -260,6 +270,34 @@ import {
   openManualAnalysis,
   type AnalysisFinding,
 } from './analysis'
+
+import { useOrdersStore } from '@/stores/orders'
+const ordersStore = useOrdersStore()
+
+const formatDocumentType = (type: string) => {
+  const map: Record<string, string> = {
+    atestado_medico: 'Atestado médico',
+    certificado_ensino_medio: 'Certificado de conclusão do ensino médio',
+    historico_escolar: 'Histórico escolar',
+  }
+
+  return map[type] || type
+}
+
+const finalizeDocument = (status: 'Aprovado' | 'Rejeitado') => {
+  if (!analysisResult.value) return
+
+  ordersStore.addOrder({
+    nome: nomeSolicitante.value,
+    tipo: formatDocumentType(tipoDocumento.value),
+    status,
+    veredito: status === 'Aprovado' ? 'Autêntico' : 'Suspeito',
+    descricao: descricao.value,
+    documentoUrl: fileUrl.value,
+  })
+
+  alert(`Documento ${status.toLowerCase()} com sucesso.`)
+}
 
 // --- Lógica Visual de Expansão ---
 const mostrarTodosDados = ref(false)

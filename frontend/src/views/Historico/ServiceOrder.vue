@@ -24,12 +24,15 @@
         </div>
 
         <el-dropdown @command="handleStatus" trigger="click">
-          <span class="cursor-pointer px-4 py-3 text-sm font-semibold bg-white border border-gray-200 rounded-lg flex items-center gap-2 hover:bg-gray-50 transition">
+          <button
+            type="button"
+            class="px-4 py-3 text-sm font-semibold bg-white border border-gray-200 rounded-lg flex items-center gap-2 hover:bg-gray-50 transition"
+          >
             {{ selectedStatus || 'Todos os status' }}
             <svg class="w-4 h-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
               <path d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z"/>
             </svg>
-          </span>
+          </button>
           <template #dropdown>
             <el-dropdown-menu>
               <el-dropdown-item command="">Todos</el-dropdown-item>
@@ -74,12 +77,15 @@
                       <path stroke-width="2" stroke-linecap="round" d="M4 6h16M9 6V4h6v2M7 6v13a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V6M10 11v6M14 11v6"/>
                     </svg>
                   </button>
-                  <button class="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-600 hover:text-white transition-all active:scale-90">
-                    <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                      <path stroke-width="2" stroke-linecap="round" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12Z"/>
-                      <circle cx="12" cy="12" r="3" stroke-width="2"/>
-                    </svg>
-                  </button>
+                <button
+                  @click="openDocument(item.documentoUrl)"
+                  class="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-600 hover:text-white transition-all active:scale-90"
+                >
+                  <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                    <path stroke-width="2" stroke-linecap="round" d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8S1 12 1 12Z"/>
+                    <circle cx="12" cy="12" r="3" stroke-width="2"/>
+                  </svg>
+                </button>
                 </div>
               </td>
             </tr>
@@ -91,9 +97,15 @@
 </template>
 
 <script setup lang="ts">
-import { 
-  search, selectedStatus, statusList, filteredList, 
-  handleStatus, statusClass, vereditoClass, deleteOrder 
+const openDocument = (url?: string) => {
+  if (!url) return
+
+  window.open(url, '_blank')
+}
+
+import {
+  search, selectedStatus, statusList, filteredList,
+  handleStatus, statusClass, vereditoClass, deleteOrder
 } from './orders'
 </script>
 
