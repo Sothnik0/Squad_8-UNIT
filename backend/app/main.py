@@ -38,6 +38,7 @@ class AnalysisRequest(BaseModel):
         "atestado_medico",
         "certificado_ensino_medio",
         "historico_escolar",
+        "diploma",
     ]
     descricao: str = ""
     arquivo: DocumentFile
