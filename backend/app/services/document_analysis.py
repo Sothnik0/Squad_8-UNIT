@@ -444,7 +444,7 @@ def build_gemini_prompt(*, solicitante: str, departamento: str, tipo_documento: 
     # Definição das instruções específicas por tipo
     instrucoes_especificas = {
         "atestado_medico": "Foque no Nome do médico, CRM, dias de afastamento e CID. Verifique carimbos e assinaturas.",
-        "certificado_ensino_medio": "Foque no Ano de Conclusão, Nome da Escola e Número de Registro GDAE/SED.",
+        "certificado_ensino_medio": "Foque no nome da escola, data de conclusão, assinatura, carimbo/selo, número de registro e possíveis inconsistências no certificado.",
         "historico_escolar": "Foque na Média Global (CRA/CR) e disciplinas pendentes."
     }
     diretriz = instrucoes_especificas.get(tipo_documento, "Extraia os dados identificadores principais.")
