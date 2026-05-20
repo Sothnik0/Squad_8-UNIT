@@ -23,8 +23,46 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ... (Suas classes DocumentFile, AnalysisRequest, Finding e AnalysisResponse permanecem iguais)
+ALLOWED_MIME_TYPES = {
+    "application/pdf",
+    "image/jpeg",
+    "image/png",
+}
 
+MAX_FILE_SIZE = 10 * 1024 * 1024
+
+class DocumentFile(BaseModel):
+    nome: str
+    tipo_mime: str
+    tamanho_bytes: int
+    conteudo_base64: str
+
+class AnalysisRequest(BaseModel):
+    solicitante: str
+    departamento: str
+    tipo_documento: str
+    descricao: str
+    arquivo: DocumentFile
+
+class Finding(BaseModel):
+    titulo: str
+    status: str
+    detalhe: str
+
+class AnalysisResponse(BaseModel):
+    protocolo: str
+    status: str
+    probabilidade_fraude: int
+    resumo: str
+    dados_chave: list[Finding]
+    verificacoes_oficiais: list[Finding]
+    alertas: list[str]
+    fatores_score: list[str]
+    proximos_passos: list[str]
+    motor_extracao: str
+    texto_extraido: str
+    tempo_resposta: float
+    
 @app.get("/")
 def home():
     return {"msg": "API estruturada", "service": "Verify API"}
@@ -34,24 +72,18 @@ def analyze_document(payload: AnalysisRequest):
     start_time = time.time()  # <--- ADICIONADO: Inicia o cronômetro
     
     file = payload.arquivo
-    if file.tipo_mime not in ALLOWED_MIME_TYPES:
+    if payload.arquivo.tipo_mime not in ALLOWED_MIME_TYPES:
+    raise HTTPException(
+        status_code=400,
+        detail="Tipo de arquivo não permitido"
+    )
+    
+    file_bytes = base64.b64decode(payload.arquivo.conteudo_base64)
+
+    if len(file_bytes) > MAX_FILE_SIZE:
         raise HTTPException(
-            status_code=400,
-            detail="Formato nao suportado. Envie PDF, JPG, JPEG ou PNG.",
-        )
-
-    if file.tamanho_bytes > MAX_FILE_SIZE:
-        raise HTTPException(status_code=400, detail="Arquivo maior que 10MB.")
-
-    try:
-        decoded = base64.b64decode(file.conteudo_base64, validate=True)
-    except ValueError as exc:
-        raise HTTPException(status_code=400, detail="Arquivo invalido.") from exc
-
-    if len(decoded) != file.tamanho_bytes:
-        raise HTTPException(
-            status_code=400,
-            detail="Tamanho do arquivo nao confere com o conteudo enviado.",
+            status_code=413,
+            detail="Arquivo muito grande"
         )
 
     protocol = datetime.now(timezone.utc).strftime("ANL-%Y%m%d-%H%M%S")
@@ -71,20 +103,27 @@ def analyze_document(payload: AnalysisRequest):
 
     # <--- ADICIONADO: Lógica de Log de Auditoria
     duration = time.time() - start_time
-    with open("auditoria_ia.log", "a") as f:
-        log_entry = f"{datetime.now()}: {protocol} | Doc: {payload.tipo_documento} | Tempo: {duration:.2f}s | Status: {report.status}\n"
-        f.write(log_entry)
+    logging.basicConfig(
+    filename="auditoria_ia.log",
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(message)s",
+)
+
+    logging.info(
+    f"PROTOCOLO={protocol} | DOC={payload.tipo_documento} | TEMPO={duration:.2f}s | STATUS={report.status}"
+)
 
     return AnalysisResponse(
-        protocolo=report.protocolo,
-        status=report.status,
-        probabilidade_fraude=report.probabilidade_fraude,
-        resumo=report.resumo,
-        dados_chave=[Finding(**item) for item in report.dados_chave],
-        verificacoes_oficiais=[Finding(**item) for item in report.verificacoes_oficiais],
-        alertas=report.alertas,
-        fatores_score=report.fatores_score,
-        proximos_passos=report.proximos_passos,
-        motor_extracao=report.motor_extracao,
-        texto_extraido=report.texto_extraido,
-    )
+    protocolo=report.protocolo,
+    status=report.status,
+    probabilidade_fraude=report.probabilidade_fraude,
+    resumo=report.resumo,
+    dados_chave=[Finding(**item) for item in report.dados_chave],
+    verificacoes_oficiais=[Finding(**item) for item in report.verificacoes_oficiais],
+    alertas=report.alertas,
+    fatores_score=report.fatores_score,
+    proximos_passos=report.proximos_passos,
+    motor_extracao=report.motor_extracao,
+    texto_extraido=report.texto_extraido,
+    tempo_resposta=duration,
+)
