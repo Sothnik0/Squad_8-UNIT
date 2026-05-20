@@ -33,7 +33,7 @@
             <select
               v-model="tipoDocumento"
               class="w-full rounded-lg border border-gray-200 bg-gray-50 p-3 outline-none focus:border-blue-500"
-              :class="{ 'border-red-500': erros.tipoDocumento }"
+              :class="{ 'border-red-500': erros.tipo }"
             >
               <option value="">Selecione o tipo</option>
               <option value="atestado_medico">Atestado Médico</option>
@@ -93,7 +93,7 @@
         </div>
       </div>
 
-      # Bloco do  Scanner Virtual
+      <!-- Bloco do Scanner Virtual -->
       <div v-if="isAnalyzing" class="relative overflow-hidden rounded-xl border border-blue-500/30 bg-slate-900 p-8 text-center shadow-2xl mb-6">
           <div class="relative z-10">
              <div class="mb-4 flex justify-center">
@@ -128,7 +128,9 @@
           <div class="flex flex-col gap-4 rounded-xl border p-6 shadow-sm md:flex-row md:items-start md:justify-between text-left" :class="riskTone">
             <div class="flex-1">
               <p class="mb-1 text-xs font-bold uppercase tracking-widest">Protocolo {{ analysisResult.protocolo }}</p>
-              <h3 class="text-lg font-bold leading-tight">Probabilidade de fraude</h3>
+              <p class="text-xs text-slate-500">
+                  Tempo de resposta: {{ analysisResult.tempo_resposta.toFixed(2) }}s
+              </p>
               <p class="mt-1 text-sm">{{ analysisResult.resumo }}</p>
             </div>
             <div class="text-left md:text-right">
