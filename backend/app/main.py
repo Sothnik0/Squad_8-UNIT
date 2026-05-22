@@ -1,5 +1,6 @@
 import base64
 import time  # <--- ADICIONADO: Para medir o tempo de resposta
+import logging
 from datetime import datetime, timezone
 from typing import Literal
 
