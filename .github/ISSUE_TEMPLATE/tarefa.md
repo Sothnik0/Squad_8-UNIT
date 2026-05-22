@@ -1,7 +1,7 @@
 ---
 name: Tarefa geral
 about: Modelo padrão para criação de issues no projeto Verify
-title: "[TIPO] Título objetivo da tarefa"
+title: "[ÁREA] Título objetivo da tarefa"
 labels: ""
 assignees: ""
 ---
