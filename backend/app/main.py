@@ -73,10 +73,10 @@ def analyze_document(payload: AnalysisRequest):
     
     file = payload.arquivo
     if payload.arquivo.tipo_mime not in ALLOWED_MIME_TYPES:
-    raise HTTPException(
-        status_code=400,
-        detail="Tipo de arquivo não permitido"
-    )
+        raise HTTPException(
+            status_code=400,
+            detail="Tipo de arquivo não permitido"
+        )
     
     file_bytes = base64.b64decode(payload.arquivo.conteudo_base64)
 
