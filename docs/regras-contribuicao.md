@@ -42,14 +42,14 @@ Toda mudança relevante deve estar vinculada a uma issue.
 
 A issue deve ter:
 
-- objetivo;
+- tipo da issue: independente, guarda-chuva ou sub-issue;
+- branch sugerida para a tarefa;
+- arquivos previstos, quando o escopo já for conhecido;
 - contexto ou problema atual;
-- tarefas;
-- critérios de aceite;
-- validação ou evidência esperada;
-- arquivos ou áreas afetadas;
-- fora do escopo;
-- branch de trabalho, quando gerar alteração no repositório.
+- objetivo da issue;
+- critérios observáveis de conclusão.
+
+Se precisar alterar algum arquivo fora dos previstos, registre a justificativa no PR.
 
 Sub-issues devem ser usadas quando uma tarefa fizer parte direta de uma issue maior. Issues guarda-chuva devem agrupar objetivos maiores e acompanhar a conclusão das tarefas relacionadas.
 
@@ -127,14 +127,11 @@ Todo Pull Request deve usar o template padrão do projeto.
 
 O PR deve:
 
-- explicar o que foi feito;
-- referenciar a issue relacionada;
-- informar a branch utilizada;
-- listar alterações realizadas;
-- justificar a mudança;
-- informar o que ficou fora do escopo;
-- apresentar validação ou evidência;
-- informar riscos ou pontos de atenção.
+- resumo do que foi entregue;
+- issue relacionada, usando `Closes #` quando resolver tudo ou apenas `#` quando for parcial;
+- lista do que mudou por arquivo;
+- justificativa da mudança, explicando antes → depois → por que é melhor;
+- descrição de como a mudança foi validada.
 
 Quando o PR resolver completamente uma issue, use:
 
@@ -239,12 +236,10 @@ Mudanças em IA/OCR/prompt devem considerar a issue #15, porque esse tipo de alt
 - [ ] A tarefa tem issue relacionada
 - [ ] A branch segue o padrão definido
 - [ ] Os commits seguem o padrão definido
-- [ ] O PR usa o template padrão
-- [ ] O título do PR segue o padrão visual do projeto
-- [ ] O PR referencia a issue com `Closes #...`, quando aplicável
-- [ ] Assignee, labels e milestone foram conferidos
-- [ ] A validação/evidência foi descrita
-- [ ] As alterações estão dentro do escopo
+- [ ] O PR referencia a issue com `Closes #`, quando aplicável
+- [ ] O que mudou está listado por arquivo
+- [ ] A validação foi descrita
+- [ ] As alterações estão dentro dos arquivos previstos na issue
 - [ ] Não há arquivos sensíveis ou desnecessários
 
 ## Padrões relacionados
