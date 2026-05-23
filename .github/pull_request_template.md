@@ -62,6 +62,9 @@ Liste limitações, dúvidas ou cuidados para quem for revisar.
 - ...
 
 ## Checklist de organização
+Preenchido pelo autor do PR antes de solicitar review.
+O reviewer deve conferir se os itens realmente foram cumpridos.
+
 - [ ] PR referencia uma issue
 - [ ] Branch segue o padrão definido em `docs/padrao-branches.md`
 - [ ] PR possui responsável definido
@@ -71,12 +74,24 @@ Liste limitações, dúvidas ou cuidados para quem for revisar.
 - [ ] Mudanças fora do escopo foram justificadas, se existirem
 
 ## Checklist antes de solicitar review
+Preenchido pelo autor do PR antes de marcar o PR como pronto para revisão.
+
 - [ ] Revisei meu próprio diff
 - [ ] Removi arquivos temporários ou desnecessários
 - [ ] Não expus chaves, tokens ou dados sensíveis
 - [ ] Descrevi a validação/evidência
 - [ ] Atualizei documentação quando necessário
 - [ ] O PR está pronto para revisão
+
+## Checklist do reviewer
+Preenchido por quem revisar o PR.
+
+- [ ] Conferi se o PR resolve a issue relacionada
+- [ ] Conferi se a branch segue o padrão definido
+- [ ] Conferi se as alterações estão dentro do escopo
+- [ ] Conferi se a validação/evidência é suficiente
+- [ ] Conferi se não há arquivos sensíveis ou alterações indevidas
+- [ ] O PR pode ser aprovado ou mergeado
 
 ## Observações
 Adicione decisões, dúvidas ou pontos de atenção.

@@ -75,5 +75,13 @@ Closes #12
 - [x] Atualizei documentação quando necessário
 - [x] O PR está pronto para revisão
 
+## Checklist do reviewer
+- [x] Conferi se o PR resolve a issue relacionada
+- [x] Conferi se a branch segue o padrão definido
+- [x] Conferi se as alterações estão dentro do escopo
+- [x] Conferi se a validação/evidência é suficiente
+- [x] Conferi se não há arquivos sensíveis ou alterações indevidas
+- [x] O PR pode ser aprovado ou mergeado
+
 ## Observações
 Este exemplo é baseado na criação do próprio template de PR do Verify.

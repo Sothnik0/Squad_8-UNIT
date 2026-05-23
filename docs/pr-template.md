@@ -95,7 +95,11 @@ Exemplo:
 
 ## Checklist de organização
 
-Antes de solicitar review, confirme:
+O checklist de organização deve ser preenchido pelo autor do PR antes de solicitar review. Ele registra se o PR está ligado a uma issue, usa uma branch no padrão definido e possui metadados básicos de organização.
+
+O reviewer deve conferir se os itens marcados pelo autor realmente foram cumpridos.
+
+Antes de solicitar review, o autor deve confirmar:
 
 - PR referencia uma issue.
 - Branch segue o padrão definido.
@@ -106,13 +110,23 @@ Antes de solicitar review, confirme:
 
 ## Checklist antes de solicitar review
 
-Antes de marcar o PR como pronto para revisão, confirme:
+O checklist antes de solicitar review também deve ser preenchido pelo autor do PR.
+
+Antes de marcar o PR como pronto para revisão, o autor deve confirmar:
 
 - O diff foi revisado.
 - Arquivos temporários foram removidos.
 - Nenhum token, chave ou dado sensível foi exposto.
 - A validação foi descrita.
 - A documentação foi atualizada quando necessário.
+
+## Checklist do reviewer
+
+O checklist do reviewer deve ser preenchido por quem revisar o PR.
+
+Esse checklist serve para conferir se a entrega resolve a issue relacionada, se a branch segue o padrão definido, se as alterações estão dentro do escopo e se a validação apresentada é suficiente.
+
+O reviewer também deve conferir se os checklists preenchidos pelo autor realmente foram cumpridos antes de aprovar ou liberar merge.
 
 ## Boas práticas
 
