@@ -1,6 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import AnalysisView from '@/views/AnaliseIa/AnalysisView.vue' 
-import ServiceOrder from '@/views/Historico/ServiceOrder.vue'
+import AnalysisView from '@/views/AnaliseIa/AnalysisView.vue'
 import DashboardView from '@/views/Dashboard/DashboardView.vue'
 import LinksView from '@/views/Links/LinksView.vue'
 
@@ -18,17 +17,11 @@ const router = createRouter({
       component: DashboardView,
     },
     {
-      path: '/ordens',
-      name: 'orders',
-      component: ServiceOrder,
-    },
-    {
       path: '/links',
       name: 'links',
-      component: LinksView
+      component: LinksView,
     },
   ],
-
 })
 
 export default router
