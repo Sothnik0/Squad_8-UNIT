@@ -1,5 +1,4 @@
 import { ref } from 'vue'
-import { addOrder } from '@/views/Historico/orders'
 
 type FindingStatus = 'encontrado' | 'nao_encontrado' | 'pendente' | 'alerta'
 
@@ -127,16 +126,6 @@ export const startAnalysis = async () => {
     analysisResult.value = data
     isAnalyzed.value     = true
 
-    // Registra automaticamente na lista de ordens de serviço
-    addOrder({
-      id:       data.protocolo,
-      nome:     nomeSolicitante.value.trim(),
-      tipo:     TIPO_LABEL[tipoDocumento.value] ?? tipoDocumento.value,
-      score:    data.probabilidade_fraude,
-      status:   data.probabilidade_fraude >= 75 ? 'Aprovado' : 'Pendente',
-      veredito: data.probabilidade_fraude >= 75 ? 'Verídico' : 'Requer verificação',
-      data:     new Date().toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }),
-    })
   } catch (error) {
     apiError.value = error instanceof Error ? error.message : 'Erro inesperado na análise.'
   } finally {
