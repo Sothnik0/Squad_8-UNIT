@@ -1,11 +1,14 @@
----
-name: Issue padrão
-about: Use este modelo para registrar tarefas, ajustes e entregas do projeto Verify.
-title: ""
-labels: ""
-assignees: ""
----
+# Modelo de Issue
 
+Este documento registra o modelo padrão de issue usado no projeto Verify.
+
+O arquivo automático usado pelo GitHub fica em:
+
+`.github/ISSUE_TEMPLATE/issue_template.md`
+
+## Modelo
+
+```markdown
 ## Tipo da issue
 - [ ] Independente
 - [ ] Guarda-chuva
@@ -28,3 +31,4 @@ O que vai ser feito e qual o resultado esperado.
 ## Como saber que tá feito
 - Critério observável 1
 - Critério observável 2
+```

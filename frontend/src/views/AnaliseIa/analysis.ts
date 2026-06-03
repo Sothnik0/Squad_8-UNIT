@@ -120,14 +120,8 @@ export const startAnalysis = async () => {
       }),
     })
 
-  const data = await response.json()
-
-  console.log('STATUS:', response.status)
-  console.log('RESPOSTA:', data)
-
-  if (!response.ok) {
-    throw new Error(JSON.stringify(data))
-  }
+    const data = await response.json()
+    if (!response.ok) throw new Error(data.detail ?? 'Não foi possível analisar o documento.')
 
     analysisResult.value = data
     isAnalyzed.value     = true
