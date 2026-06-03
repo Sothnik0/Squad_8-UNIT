@@ -11,14 +11,6 @@
 
     <nav class="flex-1 space-y-2">
       <RouterLink
-        to="/"
-        class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-slate-800 hover:text-white"
-        active-class="bg-blue-600 !text-white"
-      >
-        <span>📊</span> Dashboard
-      </RouterLink>
-
-      <RouterLink
         to="/analise"
         class="flex items-center gap-3 px-4 py-3 rounded-lg transition-colors hover:bg-slate-800 hover:text-white"
         active-class="bg-blue-600 !text-white"
