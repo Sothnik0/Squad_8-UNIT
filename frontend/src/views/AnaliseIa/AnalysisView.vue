@@ -1,37 +1,51 @@
 <template>
-  <div class="min-h-screen bg-gray-50 p-10 text-slate-700 font-sans">
+  <div class="min-h-screen bg-gray-50 dark:bg-slate-900 p-10 text-slate-700 dark:text-slate-300 dark:text-slate-200 font-sans transition-colors duration-300">
     <div class="mx-auto max-w-6xl">
-      <header class="mb-10">
-        <h1 class="text-4xl font-extrabold text-slate-800 text-left tracking-tight">Análise de Documento</h1>
-        <p class="text-base text-slate-500 text-left mt-2">Envie o arquivo, acompanhe o score e veja exatamente o que levou o sistema a essa conclusão.</p>
+      <header class="mb-10 flex items-start justify-between">
+        <div>
+          <h1 class="text-4xl font-extrabold text-slate-800 dark:text-slate-100 text-left tracking-tight">
+            Análise de Documento
+          </h1>
+
+          <p class="text-base text-slate-500 dark:text-slate-400 text-left mt-2">
+            Envie o arquivo, acompanhe o score e veja exatamente o que levou o sistema a essa conclusão.
+          </p>
+        </div>
+
+        <button
+          @click="toggleDarkMode"
+          class="px-4 py-2 rounded-xl bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-100 font-semibold transition-all hover:scale-105"
+        >
+          {{ darkMode ? '☀️ Light' : '🌙 Dark' }}
+        </button>
       </header>
 
-      <div class="mb-8 flex items-center gap-4 rounded-xl border border-blue-100 bg-blue-50 p-4 text-left">
+      <div class="mb-8 flex items-center gap-4 rounded-xl border border-blue-100 dark:border-blue-800 bg-blue-50 dark:bg-blue-950/40 p-4 text-left">
         <span class="text-xl font-bold text-red-500">*</span>
-        <p class="text-base font-medium text-blue-700">Este símbolo indica campo obrigatório</p>
+        <p class="text-base font-medium text-blue-700 dark:text-blue-300"> símbolo indica campo obrigatório</p>
       </div>
 
-      <div class="mb-8 rounded-xl border border-gray-100 bg-white p-10 shadow-sm text-left">
-        <h3 class="mb-6 text-xl font-bold text-slate-800">Informações da Solicitação</h3>
+      <div class="mb-8 rounded-xl border border-gray-100 dark:border-slate-700 bg-white dark:bg-slate-800 dark:bg-slate-800 p-10 shadow-sm text-left">
+        <h3 class="mb-6 text-xl font-bold text-slate-800 dark:text-slate-100 dark:text-slate-100">Informações da Solicitação</h3>
 
         <div class="grid grid-cols-1 gap-8 md:grid-cols-2">
           <div class="space-y-2">
-            <label class="text-base font-semibold text-slate-700">Nome do solicitante *</label>
+            <label class="text-base font-semibold text-slate-700 dark:text-slate-300">Nome do solicitante *</label>
             <input
               v-model="nomeSolicitante"
               type="text"
               placeholder="Nome completo"
-              class="w-full rounded-lg border bg-gray-50 p-4 text-base outline-none transition"
-              :class="erros.nome ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-200 focus:ring-2 focus:ring-blue-500'"
+              class="w-full rounded-lg border bg-gray-50 dark:bg-slate-700 dark:border-slate-600 dark:text-slate-100 p-4 text-base outline-none transition"
+              :class="erros.nome ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-200 dark:border-slate-600 focus:ring-2 focus:ring-blue-500'"
             />
             <p v-if="erros.nome" class="text-xs font-medium text-red-500">{{ erros.nome }}</p>
           </div>
           <div class="space-y-2">
-            <label class="text-base font-semibold text-slate-700">Tipo de documento *</label>
+            <label class="text-base font-semibold text-slate-700 dark:text-slate-300">Tipo de documento *</label>
             <select
               v-model="tipoDocumento"
-              class="w-full rounded-lg border bg-gray-50 p-4 text-base outline-none transition"
-              :class="erros.tipo ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-200 focus:ring-2 focus:ring-blue-500'"
+              class="w-full rounded-lg border bg-gray-50 dark:bg-slate-700 dark:border-slate-600 dark:text-slate-100 p-4 text-base outline-none transition"
+              :class="erros.tipo ? 'border-red-500 ring-1 ring-red-500' : 'border-gray-200 dark:border-slate-600 focus:ring-2 focus:ring-blue-500'"
             >
               <option value="">Selecione</option>
               <option value="atestado_medico">Atestado médico</option>
@@ -43,20 +57,20 @@
           </div>
 
           <div class="space-y-2 md:col-span-2">
-            <label class="text-base font-semibold text-slate-700">Descrição adicional</label>
+            <label class="text-base font-semibold text-slate-700 dark:text-slate-300">Descrição adicional</label>
             <input
               v-model="descricao"
               type="text"
               placeholder="Informações extras sobre o documento"
-              class="w-full rounded-lg border border-gray-200 bg-gray-50 p-4 text-base outline-none transition focus:ring-2 focus:ring-blue-500"
+              class="w-full rounded-lg border border-gray-200 dark:border-slate-600 dark:border-slate-600 bg-gray-50 dark:bg-slate-700 dark:text-slate-100 p-4 text-base outline-none transition focus:ring-2 focus:ring-blue-500"
             />
           </div>
         </div>
       </div>
 
       <div
-        class="group mb-6 cursor-pointer rounded-xl border-2 border-dashed bg-white p-14 text-center transition-all hover:shadow-md"
-        :class="erros.arquivo ? 'border-red-400 bg-red-50' : 'border-gray-200 hover:border-blue-400 hover:bg-blue-50'"
+        class="group mb-6 cursor-pointer rounded-xl border-2 border-dashed bg-white dark:bg-slate-800 p-14 text-center transition-all hover:shadow-md"
+        :class="erros.arquivo ? 'border-red-400 bg-red-50' : 'border-gray-200 dark:border-slate-600 hover:border-blue-400 hover:bg-blue-50'"
         @click="triggerFile"
       >
         <input ref="fileInput" type="file" class="hidden" accept=".pdf,.jpg,.jpeg,.png" @change="onFileChange" />
@@ -67,8 +81,8 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
             </svg>
           </div>
-          <p class="text-xl font-bold">Clique para selecionar o documento</p>
-          <p class="mt-2 text-base text-gray-400">PDF, JPG, JPEG, PNG (máx. 10MB)</p>
+          <p class="text-xl font-bold text-slate-800 dark:text-slate-100 dark:text-slate-100">Clique para selecionar o documento</p>
+          <p class="mt-2 text-base text-gray-400 dark:text-slate-500 dark:text-slate-400">, JPG, JPEG, PNG (máx. 10MB)</p>
         </div>
 
         <div v-else class="flex flex-col items-center font-bold text-green-600">
@@ -120,24 +134,24 @@
 
           <div class="grid grid-cols-1 gap-8 md:grid-cols-2">
 
-            <section class="rounded-xl border border-gray-100 bg-white p-8 shadow-sm text-left cursor-pointer transition-all duration-500 hover:shadow-xl hover:shadow-blue-500/10 hover:-translate-y-1.5 hover:border-slate-200">
-              <h4 class="mb-5 font-bold text-slate-800 text-xl">Dados encontrados e pendências</h4>
+            <section class="rounded-xl border border-gray-100 dark:border-slate-700 bg-white dark:bg-slate-800 dark:bg-slate-800 p-8 shadow-sm text-left cursor-pointer transition-all duration-500 hover:shadow-xl hover:shadow-blue-500/10 hover:-translate-y-1.5 hover:border-slate-200">
+              <h4 class="mb-5 font-bold text-slate-800 dark:text-slate-100 text-xl">Dados encontrados e pendências</h4>
               <div class="space-y-4">
-                <div v-for="item in dadosExibidos" :key="item.titulo" class="rounded-lg border border-gray-100 p-5 transition-all duration-200 bg-slate-50/30 hover:bg-white hover:border-slate-300 hover:shadow-sm">
+                <div v-for="item in dadosExibidos" :key="item.titulo" class="rounded-lg border border-gray-100 p-5 transition-all duration-200 bg-slate-50/30 hover:bg-white dark:bg-slate-800 hover:border-slate-300 hover:shadow-sm">
                   <div class="mb-2 flex items-center justify-between gap-3">
-                    <p class="font-bold text-slate-800 text-base">{{ item.titulo }}</p>
+                    <p class="font-bold text-slate-800 dark:text-slate-100 text-base">{{ item.titulo }}</p>
                     <span class="rounded-full px-3 py-1 text-xs font-bold" :class="statusClass(item.status)">
                       {{ statusLabel(item.status) }}
                     </span>
                   </div>
-                  <p class="text-sm text-slate-500">{{ item.detalhe }}</p>
+                  <p class="text-sm text-slate-500 dark:text-slate-400">{{ item.detalhe }}</p>
                 </div>
               </div>
 
               <div v-if="temMaisDados" class="mt-5">
                 <button
                   @click="mostrarTodosDados = !mostrarTodosDados"
-                  class="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 py-3 text-sm font-bold text-slate-600 transition hover:bg-slate-50 cursor-pointer"
+                  class="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 py-3 text-sm font-bold text-slate-600 dark:text-slate-300 transition hover:bg-slate-50 cursor-pointer"
                 >
                   <span>{{ mostrarTodosDados ? 'Ver menos' : `Ver mais (${analysisResult.dados_chave.length - 4} ocultos)` }}</span>
                   <svg class="h-4 w-4 transition-transform" :class="{ 'rotate-180': mostrarTodosDados }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -147,25 +161,25 @@
               </div>
             </section>
 
-            <section class="rounded-xl border border-gray-100 bg-white p-8 shadow-sm text-left cursor-pointer transition-all duration-500 hover:shadow-xl hover:shadow-blue-500/10 hover:-translate-y-1.5 hover:border-slate-200">
-              <h4 class="mb-5 font-bold text-slate-800 text-xl">Verificações executadas</h4>
+            <section class="rounded-xl border border-gray-100 dark:border-slate-700 bg-white dark:bg-slate-800 dark:bg-slate-800 p-8 shadow-sm text-left cursor-pointer transition-all duration-500 hover:shadow-xl hover:shadow-blue-500/10 hover:-translate-y-1.5 hover:border-slate-200">
+              <h4 class="mb-5 font-bold text-slate-800 dark:text-slate-100 text-xl">Verificações executadas</h4>
               <div class="space-y-4">
                 <div
                   v-for="item in verificacoesExibidas"
                   :key="item.titulo"
-                  class="rounded-lg border border-gray-100 p-5 transition-all duration-200 bg-slate-50/30 hover:bg-white hover:border-slate-300 hover:shadow-sm"
+                  class="rounded-lg border border-gray-100 p-5 transition-all duration-200 bg-slate-50/30 hover:bg-white dark:bg-slate-800 hover:border-slate-300 hover:shadow-sm"
                 >
                   <div class="mb-2 flex items-center justify-between gap-3">
-                    <p class="font-bold text-slate-800 text-base">{{ item.titulo }}</p>
+                    <p class="font-bold text-slate-800 dark:text-slate-100 text-base">{{ item.titulo }}</p>
                     <span class="shrink-0 rounded-full px-3 py-1 text-xs font-bold" :class="statusClass(item.status)">
                       {{ statusLabel(item.status) }}
                     </span>
                   </div>
-                  <p class="text-sm text-slate-500">{{ item.detalhe }}</p>
-                  
+                  <p class="text-sm text-slate-500 dark:text-slate-400">{{ item.detalhe }}</p>
+
                   <div
                     v-if="nextAction(item.status, item.titulo)"
-                    class="mt-3 flex items-start gap-2 rounded-md border-l-4 pl-3 py-2 bg-white"
+                    class="mt-3 flex items-start gap-2 rounded-md border-l-4 pl-3 py-2 bg-white dark:bg-slate-800"
                     :class="actionBorderClass(item.status)"
                   >
                     <span class="text-base leading-none mt-0.5">{{ actionIcon(item.status) }}</span>
@@ -179,7 +193,7 @@
               <div v-if="temMaisVerificacoes" class="mt-5">
                 <button
                   @click="mostrarTodasVerificacoes = !mostrarTodasVerificacoes"
-                  class="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 py-3 text-sm font-bold text-slate-600 transition hover:bg-slate-50 cursor-pointer"
+                  class="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 py-3 text-sm font-bold text-slate-600 dark:text-slate-300 transition hover:bg-slate-50 cursor-pointer"
                 >
                   <span>{{ mostrarTodasVerificacoes ? 'Ver menos' : `Ver mais (${analysisResult.verificacoes_oficiais.length - 4} ocultos)` }}</span>
                   <svg class="h-4 w-4 transition-transform" :class="{ 'rotate-180': mostrarTodasVerificacoes }" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -191,18 +205,18 @@
           </div>
 
           <div class="grid grid-cols-1 gap-8 md:grid-cols-2 text-left">
-            <section class="rounded-xl border border-gray-100 bg-white p-8 shadow-sm transition-all duration-300 hover:shadow-md">
-              <h4 class="mb-2 font-bold text-slate-800 text-xl">Camada de extração</h4>
-              <p class="text-sm text-slate-500">Origem principal dos dados exibidos no relatório.</p>
+            <section class="rounded-xl border border-gray-100 dark:border-slate-700 bg-white dark:bg-slate-800 dark:bg-slate-800 p-8 shadow-sm transition-all duration-300 hover:shadow-md">
+              <h4 class="mb-2 font-bold text-slate-800 dark:text-slate-100 text-xl">Camada de extração</h4>
+              <p class="text-sm text-slate-500 dark:text-slate-400">Origem principal dos dados exibidos no relatório.</p>
               <div class="mt-5 rounded-lg border border-blue-100 bg-blue-50 p-5">
                 <p class="text-xs font-bold uppercase tracking-widest text-blue-700">Motor utilizado</p>
                 <p class="mt-1 text-base font-bold text-blue-900">{{ analysisResult.motor_extracao || 'Google Gemini 2.0 Flash' }}</p>
               </div>
             </section>
 
-            <section class="rounded-xl border border-gray-100 bg-white p-8 shadow-sm transition-all duration-300 hover:shadow-md">
-              <h4 class="mb-2 font-bold text-slate-800 text-xl">Texto extraído do documento</h4>
-              <p class="text-sm text-slate-500">Trecho bruto lido pelo OCR para conferência.</p>
+            <section class="rounded-xl border border-gray-100 dark:border-slate-700 bg-white dark:bg-slate-800 dark:bg-slate-800 p-8 shadow-sm transition-all duration-300 hover:shadow-md">
+              <h4 class="mb-2 font-bold text-slate-800 dark:text-slate-100 text-xl">Texto extraído do documento</h4>
+              <p class="text-sm text-slate-500 dark:text-slate-400">Trecho bruto lido pelo OCR para conferência.</p>
               <pre class="mt-5 max-h-48 overflow-auto rounded-lg bg-slate-950 p-5 text-sm leading-relaxed text-slate-100 whitespace-pre-wrap font-mono">{{ analysisResult.texto_extraido || 'Nenhum texto OCR disponível.' }}</pre>
             </section>
           </div>
@@ -217,7 +231,7 @@
               <h4 class="text-2xl font-black">Deseja realizar a perícia manual?</h4>
               <p class="text-blue-100 text-base mt-1">Visualize o documento original e confira os selos de autenticidade.</p>
             </div>
-            <button class="rounded-xl bg-white px-10 py-4 font-bold text-base text-blue-600 shadow-md transition-colors hover:bg-blue-50 cursor-pointer shrink-0" @click="openModal">
+            <button class="rounded-xl bg-white dark:bg-slate-800 px-10 py-4 font-bold text-base text-blue-600 shadow-md transition-colors hover:bg-blue-50 cursor-pointer shrink-0" @click="openModal">
               Visualizar documento
             </button>
           </div>
@@ -225,21 +239,21 @@
       </transition>
 
       <div v-if="showDocModal" class="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-3 backdrop-blur-sm">
-        <div class="flex w-full max-w-6xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl" style="height: 95vh;">
+        <div class="flex w-full max-w-6xl flex-col overflow-hidden rounded-2xl bg-white dark:bg-slate-800 shadow-2xl" style="height: 95vh;">
 
-          <div class="flex flex-shrink-0 items-center justify-between border-b bg-slate-50 px-5 py-4">
+          <div class="flex flex-shrink-0 items-center justify-between border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 px-5 py-4">
             <div>
-              <h3 class="font-bold text-xl text-slate-800">{{ file?.name }}</h3>
+              <h3 class="font-bold text-xl text-slate-800 dark:text-slate-100">{{ file?.name }}</h3>
               <p class="text-xs text-slate-400">Confira o documento antes de tomar a decisão final.</p>
             </div>
             <div class="flex items-center gap-3">
-              <div class="flex items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-1">
-                <button @click="zoomOut" class="px-2 py-0.5 text-lg font-bold text-slate-500 hover:text-slate-800 transition cursor-pointer" title="Reduzir">−</button>
-                <span class="min-w-[3rem] text-center text-xs font-semibold text-slate-600">{{ zoomLevel }}%</span>
-                <button @click="zoomIn"  class="px-2 py-0.5 text-lg font-bold text-slate-500 hover:text-slate-800 transition cursor-pointer" title="Ampliar">+</button>
-                <button @click="zoomReset" class="ml-1 px-2 py-0.5 text-xs font-semibold text-slate-400 hover:text-slate-700 transition cursor-pointer" title="Resetar">↺</button>
+              <div class="flex items-center gap-1 rounded-lg border border-slate-200 bg-white dark:bg-slate-800 px-2 py-1">
+                <button @click="zoomOut" class="px-2 py-0.5 text-lg font-bold text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:text-slate-100 transition cursor-pointer" title="Reduzir">−</button>
+                <span class="min-w-[3rem] text-center text-xs font-semibold text-slate-600 dark:text-slate-300">{{ zoomLevel }}%</span>
+                <button @click="zoomIn"  class="px-2 py-0.5 text-lg font-bold text-slate-500 dark:text-slate-400 hover:text-slate-800 transition cursor-pointer" title="Ampliar">+</button>
+                <button @click="zoomReset" class="ml-1 px-2 py-0.5 text-xs font-semibold text-slate-400 hover:text-slate-700 dark:text-slate-300 transition cursor-pointer" title="Resetar">↺</button>
               </div>
-              <button class="rounded-lg bg-slate-200 px-5 py-2 text-sm font-bold text-slate-600 transition hover:bg-slate-300 cursor-pointer" @click="showDocModal = false">Fechar</button>
+              <button class="rounded-lg bg-slate-200 px-5 py-2 text-sm font-bold text-slate-600 dark:text-slate-300 transition hover:bg-slate-300 cursor-pointer" @click="showDocModal = false">Fechar</button>
             </div>
           </div>
 
@@ -259,18 +273,18 @@
                 <iframe
                   v-else
                   :src="fileUrl"
-                  class="block w-full rounded shadow-lg border-none bg-white"
+                  class="block w-full rounded shadow-lg border-none bg-white dark:bg-slate-800"
                   style="height: 75vh; min-height: 500px;"
                 ></iframe>
               </div>
             </div>
 
-            <div class="flex w-64 flex-shrink-0 flex-col gap-4 overflow-y-auto border-l bg-white p-5">
+            <div class="flex w-64 flex-shrink-0 flex-col gap-4 overflow-y-auto border-l bg-white dark:bg-slate-800 p-5">
               <h4 class="text-xs font-bold uppercase tracking-widest text-slate-400">Checklist de Perícia</h4>
               <div class="space-y-3">
                 <label v-for="(item, i) in checklist" :key="i" class="flex cursor-pointer items-start gap-3 rounded-lg border border-slate-100 p-3 hover:bg-slate-50 transition">
                   <input type="checkbox" v-model="item.done" class="mt-0.5 h-4 w-4 rounded accent-blue-600 flex-shrink-0 cursor-pointer" />
-                  <span class="text-xs leading-relaxed text-slate-600" :class="{ 'line-through text-slate-400': item.done }">{{ item.text }}</span>
+                  <span class="text-xs leading-relaxed text-slate-600 dark:text-slate-300" :class="{ 'line-through text-slate-400': item.done }">{{ item.text }}</span>
                 </label>
               </div>
               <div class="mt-auto rounded-lg border text-center py-2 text-xs font-bold"
@@ -286,7 +300,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import {
   nomeSolicitante,
   tipoDocumento,
@@ -307,6 +321,28 @@ import {
   openManualAnalysis,
   type AnalysisFinding,
 } from './analysis'
+
+const darkMode = ref(false)
+
+onMounted(() => {
+  darkMode.value = localStorage.getItem('theme') === 'dark'
+
+  if (darkMode.value) {
+    document.documentElement.classList.add('dark')
+  }
+})
+
+const toggleDarkMode = () => {
+  darkMode.value = !darkMode.value
+
+  if (darkMode.value) {
+    document.documentElement.classList.add('dark')
+    localStorage.setItem('theme', 'dark')
+  } else {
+    document.documentElement.classList.remove('dark')
+    localStorage.setItem('theme', 'light')
+  }
+}
 
 // --- Lógica Visual de Expansão ---
 const mostrarTodosDados = ref(false)
@@ -442,7 +478,7 @@ const actionBorderClass = (status: string): string => {
 const actionTextClass = (status: string): string => {
   if (status === 'alerta')         return 'text-amber-800'
   if (status === 'nao_encontrado') return 'text-blue-800'
-  if (status === 'pendente')       return 'text-slate-700'
+  if (status === 'pendente')       return 'text-slate-700 dark:text-slate-300'
   return ''
 }
 
@@ -459,7 +495,7 @@ const statusLabel = (status: AnalysisFinding['status']) => {
 const statusClass = (status: AnalysisFinding['status']) => {
   const classes = {
     encontrado: 'bg-emerald-100 text-emerald-700',
-    nao_encontrado: 'bg-slate-100 text-slate-600',
+    nao_encontrado: 'bg-slate-100 text-slate-600 dark:text-slate-300',
     pendente: 'bg-blue-100 text-blue-700',
     alerta: 'bg-amber-100 text-amber-700',
   }
@@ -472,4 +508,4 @@ const statusClass = (status: AnalysisFinding['status']) => {
 
 .fade-enter-active, .fade-leave-active { transition: opacity 0.4s ease; }
 .fade-enter-from, .fade-leave-to { opacity: 0; }
-</style>  
+</style>

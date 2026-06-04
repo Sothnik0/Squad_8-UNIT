@@ -52,8 +52,13 @@
 .delay-500 { animation-delay: 0.5s; }
 
 .dashboard-card {
-  @apply transition-all duration-500 bg-white/80 backdrop-blur-sm border border-slate-100 rounded-2xl p-6;
-  
+.dashboard-card {
+  @apply transition-all duration-500
+         bg-white/80 dark:bg-slate-800
+         backdrop-blur-sm
+         border border-slate-100 dark:border-slate-700
+         rounded-2xl p-6;
+}
   &:hover {
     animation: none !important;
     @apply shadow-xl shadow-blue-500/10 -translate-y-1;
@@ -71,9 +76,9 @@
 
 .table-row-hover {
   @apply transition-all duration-300;
-  
+
   &:hover {
-    @apply bg-slate-50/80;
+    @apply bg-slate-50/80 dark:bg-slate-700/40;
   }
 }
 
