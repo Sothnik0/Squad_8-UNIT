@@ -222,8 +222,18 @@
           </div>
 
           <div class="grid grid-cols-1 gap-6 pt-4 md:grid-cols-2">
-            <button class="rounded-xl bg-emerald-600 py-5 font-bold text-lg text-white shadow-lg transition-all hover:bg-emerald-700 active:scale-98 cursor-pointer">Aceitar documento</button>
-            <button class="rounded-xl bg-rose-600 py-5 font-bold text-lg text-white shadow-lg transition-all hover:bg-rose-700 active:scale-98 cursor-pointer">Rejeitar documento</button>
+            <button class="flex items-center justify-center gap-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 py-4.5 font-bold text-lg text-white shadow-lg shadow-emerald-500/20 transition-all duration-300 ease-out hover:from-emerald-600 hover:to-teal-700 hover:shadow-xl hover:shadow-emerald-500/30 hover:-translate-y-0.5 active:scale-98 cursor-pointer">
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+              </svg>
+              Aceitar documento
+            </button>
+            <button class="flex items-center justify-center gap-2.5 rounded-xl bg-gradient-to-r from-rose-500 to-red-600 py-4.5 font-bold text-lg text-white shadow-lg shadow-rose-500/20 transition-all duration-300 ease-out hover:from-rose-600 hover:to-red-700 hover:shadow-xl hover:shadow-rose-500/30 hover:-translate-y-0.5 active:scale-98 cursor-pointer">
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+              Rejeitar documento
+            </button>
           </div>
 
           <div class="flex flex-col items-center justify-between gap-6 rounded-2xl bg-blue-600 p-10 shadow-xl md:flex-row text-left">
