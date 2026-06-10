@@ -144,3 +144,71 @@ const fileToBase64 = (selectedFile: File) =>
     reader.onerror = () => reject(new Error('Não foi possível ler o arquivo.'))
     reader.readAsDataURL(selectedFile)
   })
+
+export const acceptDocument = async () => {
+  if (!analysisResult.value) return
+  const proto = analysisResult.value.protocolo
+  try {
+    const response = await fetch(`${API_URL}/analises/${proto}/status`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'aprovado' }),
+    })
+    if (!response.ok) throw new Error('Falha ao atualizar status para aprovado.')
+    analysisResult.value.status = 'aprovado' as any
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+export const rejectDocument = async () => {
+  if (!analysisResult.value) return
+  const proto = analysisResult.value.protocolo
+  try {
+    const response = await fetch(`${API_URL}/analises/${proto}/status`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'rejeitado' }),
+    })
+    if (!response.ok) throw new Error('Falha ao atualizar status para rejeitado.')
+    analysisResult.value.status = 'rejeitado' as any
+  } catch (e) {
+    console.error(e)
+  }
+}
+
+export const loadAnalysisIntoView = (data: any) => {
+  apiError.value = ''
+  erros.value = { nome: '', tipo: '', arquivo: '' }
+  
+  const nameMap: Record<string, string> = {
+    'Atestado médico': 'atestado_medico',
+    'Certificado de conclusão do ensino médio': 'certificado_ensino_medio',
+    'Diploma de graduação': 'diploma',
+    'Histórico escolar': 'historico_escolar'
+  }
+  
+  nomeSolicitante.value = data.solicitante
+  departamento.value = data.departamento || ''
+  tipoDocumento.value = nameMap[data.tipo_documento_nome] || 'atestado_medico'
+  descricao.value = data.descricao || ''
+  
+  analysisResult.value = {
+    protocolo: data.protocolo,
+    status: data.status,
+    probabilidade_fraude: data.probabilidade_fraude,
+    resumo: data.resumo,
+    dados_chave: data.dados_chave || [],
+    verificacoes_oficiais: data.verificacoes_oficiais || [],
+    alertas: data.alertas || [],
+    fatores_score: data.fatores_score || [],
+    proximos_passos: data.proximos_passos || [],
+    motor_extracao: data.motor_extracao,
+    texto_extraido: data.texto_extraido
+  }
+  
+  file.value = new File([], `Documento_${data.protocolo}.pdf`)
+  fileUrl.value = '' 
+  isAnalyzed.value = true
+}
+
