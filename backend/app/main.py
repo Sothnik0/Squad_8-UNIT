@@ -8,9 +8,16 @@ from pydantic import BaseModel, Field
 
 from app import config  # noqa: F401
 from app.services.document_analysis import build_analysis
+from app.database import init_db, save_analysis, get_analyses, update_analysis_status
 
 
 app = FastAPI(title="Verify API")
+
+
+@app.on_event("startup")
+def startup_event():
+    init_db()
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -113,6 +120,33 @@ def analyze_document(payload: AnalysisRequest):
         file_size_bytes=file.tamanho_bytes,
     )
 
+    # Save to database
+    report_dict = {
+        "protocolo": report.protocolo,
+        "status": report.status,
+        "probabilidade_fraude": report.probabilidade_fraude,
+        "resumo": report.resumo,
+        "dados_chave": report.dados_chave,
+        "verificacoes_oficiais": report.verificacoes_oficiais,
+        "alertas": report.alertas,
+        "fatores_score": report.fatores_score,
+        "proximos_passos": report.proximos_passos,
+        "motor_extracao": report.motor_extracao,
+        "texto_extraido": report.texto_extraido,
+        # request input fields:
+        "solicitante": payload.solicitante.strip(),
+        "departamento": payload.departamento.strip(),
+        "tipo_documento": payload.tipo_documento,
+        "descricao": payload.descricao.strip(),
+    }
+    try:
+        save_analysis(report_dict)
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Erro ao salvar analise no banco de dados: {str(e)}"
+        )
+
     return AnalysisResponse(
         protocolo=report.protocolo,
         status=report.status,
@@ -126,3 +160,28 @@ def analyze_document(payload: AnalysisRequest):
         motor_extracao=report.motor_extracao,
         texto_extraido=report.texto_extraido,
     )
+
+
+@app.get("/analises")
+def list_analyses():
+    try:
+        return get_analyses()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Erro ao buscar analises: {str(e)}")
+
+
+class UpdateStatusRequest(BaseModel):
+    status: Literal["aprovado", "rejeitado", "rascunho_tecnico", "analisado", "ia_indisponivel"]
+
+
+@app.put("/analises/{protocolo}/status")
+def update_status(protocolo: str, payload: UpdateStatusRequest):
+    try:
+        updated = update_analysis_status(protocolo, payload.status)
+        if not updated:
+            raise HTTPException(status_code=404, detail="Analise nao encontrada.")
+        return {"msg": "Status atualizado com sucesso", "protocolo": protocolo, "status": payload.status}
+    except Exception as e:
+        if isinstance(e, HTTPException):
+            raise e
+        raise HTTPException(status_code=500, detail=f"Erro ao atualizar status: {str(e)}")

@@ -222,8 +222,18 @@
           </div>
 
           <div class="grid grid-cols-1 gap-6 pt-4 md:grid-cols-2">
-            <button class="rounded-xl bg-emerald-600 py-5 font-bold text-lg text-white shadow-lg transition-all hover:bg-emerald-700 active:scale-98 cursor-pointer">Aceitar documento</button>
-            <button class="rounded-xl bg-rose-600 py-5 font-bold text-lg text-white shadow-lg transition-all hover:bg-rose-700 active:scale-98 cursor-pointer">Rejeitar documento</button>
+            <button @click="acceptDocument" class="flex items-center justify-center gap-2.5 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 py-4.5 font-bold text-lg text-white shadow-lg shadow-emerald-500/20 transition-all duration-300 ease-out hover:from-emerald-600 hover:to-teal-700 hover:shadow-xl hover:shadow-emerald-500/30 hover:-translate-y-0.5 active:scale-98 cursor-pointer">
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+              </svg>
+              Aceitar documento
+            </button>
+            <button @click="rejectDocument" class="flex items-center justify-center gap-2.5 rounded-xl bg-gradient-to-r from-rose-500 to-red-600 py-4.5 font-bold text-lg text-white shadow-lg shadow-rose-500/20 transition-all duration-300 ease-out hover:from-rose-600 hover:to-red-700 hover:shadow-xl hover:shadow-rose-500/30 hover:-translate-y-0.5 active:scale-98 cursor-pointer">
+              <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+              Rejeitar documento
+            </button>
           </div>
 
           <div class="flex flex-col items-center justify-between gap-6 rounded-2xl bg-blue-600 p-10 shadow-xl md:flex-row text-left">
@@ -263,8 +273,15 @@
                 class="mx-auto origin-top transition-transform duration-200"
                 :style="{ transform: `scale(${zoomLevel / 100})`, transformOrigin: 'top center', width: docIsImage ? 'fit-content' : '100%' }"
               >
+                <div v-if="!fileUrl" class="flex flex-col items-center justify-center h-[50vh] text-white text-center px-4">
+                  <svg class="h-16 w-16 text-slate-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                  </svg>
+                  <p class="text-lg font-bold">Arquivo original não armazenado no banco</p>
+                  <p class="text-sm text-slate-400 mt-2 max-w-md">Para fins de otimização de banco de dados e privacidade, os dados binários do documento não são armazenados permanentemente.</p>
+                </div>
                 <img
-                  v-if="docIsImage"
+                  v-else-if="docIsImage"
                   :src="fileUrl"
                   class="block rounded shadow-lg"
                   style="max-width: 680px; width: 100%;"
@@ -319,6 +336,8 @@ import {
   removeFile,
   startAnalysis,
   openManualAnalysis,
+  acceptDocument,
+  rejectDocument,
   type AnalysisFinding,
 } from './analysis'
 
@@ -398,18 +417,24 @@ const openModal = () => {
 const score = computed(() => analysisResult.value?.probabilidade_fraude ?? 0)
 
 const riskTone = computed(() => {
-  if (score.value >= 75) return 'border-emerald-200 bg-emerald-50 text-emerald-800'
-  if (score.value >= 50) return 'border-amber-200 bg-amber-50 text-amber-800'
-  return 'border-red-200 bg-red-50 text-red-800'
+  if (analysisResult.value?.status === 'aprovado') return 'border-emerald-200 bg-emerald-50 dark:bg-emerald-950/30 dark:border-emerald-900 text-emerald-800 dark:text-emerald-300'
+  if (analysisResult.value?.status === 'rejeitado') return 'border-red-200 bg-red-50 dark:bg-red-950/30 dark:border-red-900 text-red-800 dark:text-red-300'
+  if (score.value >= 75) return 'border-emerald-200 bg-emerald-50 dark:bg-emerald-950/30 dark:border-emerald-900 text-emerald-800 dark:text-emerald-300'
+  if (score.value >= 50) return 'border-amber-200 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-900 text-amber-800 dark:text-amber-300'
+  return 'border-red-200 bg-red-50 dark:bg-red-950/30 dark:border-red-900 text-red-800 dark:text-red-300'
 })
 
 const scoreLabel = computed(() => {
+  if (analysisResult.value?.status === 'aprovado') return '✅ Documento Aprovado'
+  if (analysisResult.value?.status === 'rejeitado') return '❌ Documento Rejeitado'
   if (score.value >= 75) return '✅ Documento provavelmente verídico'
   if (score.value >= 50) return '🟡 Requer verificação externa'
   return '⚠️ Documento suspeito — verificar manualmente'
 })
 
 const scoreDesc = computed(() => {
+  if (analysisResult.value?.status === 'aprovado') return 'Aprovado na perícia manual'
+  if (analysisResult.value?.status === 'rejeitado') return 'Rejeitado na perícia manual'
   if (score.value >= 75) return 'Alta confiança na autenticidade'
   if (score.value >= 50) return 'Confirmação manual recomendada'
   return 'Indícios de irregularidade detectados'
